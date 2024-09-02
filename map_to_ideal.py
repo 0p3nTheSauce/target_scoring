@@ -3,7 +3,8 @@ import numpy as np
 
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 ideal = cv2.imread("ideal_map.jpg", cv2.IMREAD_GRAYSCALE)
-resized_o = cv2.resize(original, ideal.shape)
+# resized_o = cv2.resize(original, ideal.shape)
+resized_o = cv2.resize(original, (500, 500))
 
 _, thresh_o = cv2.threshold(resized_o, 120, 255, cv2.THRESH_BINARY)
 _, thresh_i = cv2.threshold(ideal, 120, 255, cv2.THRESH_BINARY)
@@ -20,6 +21,31 @@ totcy = 0
 thresh = 2
 major_prev = 0
 score_rings = 0
+radii = []
+mapped = np.zeros(ideal.shape, np.uint8)
+
+for circle in contours_o:
+  if len(circle) < 5:
+    continue
+  ellipse = cv2.fitEllipse(circle)
+  ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+  if abs(major_axis - major_prev) < thresh:
+    continue
+  radii.append(int((major_axis + minor_axis)//2))
+  major_prev = major_axis
+  print(ellipse)
+  score_rings += 1
+  totcx += cx
+  totcy += cy
+
+original_centre = (totcx//score_rings, totcy//score_rings)
+scale = ideal.shape[0]/original.shape[0]
+mapped_centre = (int(original_centre[0]*scale), int(original_centre[1]*scale))
+for i in range(score_rings):
+  cv2.circle(mapped, mapped_centre, radii[i], (255, 255, 255), 1, cv2.LINE_8)
+#At this point the rings are proportioned correctly, but the wrong size
+
+print()
 
 for circle in contours_i:
   if len(circle) < 5:
@@ -35,6 +61,12 @@ for circle in contours_i:
   totcx += cx
   totcy += cy
 
+
+
 avgcx = totcx / len(contours_o)
 avgcy = totcy / len(contours_o)
 print(score_rings)
+
+cv2.imshow("Mapped", mapped)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
