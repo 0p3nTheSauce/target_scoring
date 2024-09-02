@@ -9,13 +9,13 @@ def drawMinEnclose(resized,circles):
     cv2.circle(resized,center,radius-1,(0,255,0),2)
 
 imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
-
+# imgFile = cv2.imread("TargetPhotos/20130826_191912.jpg", 1)
 resized = cv2.resize(imgFile,(500,500))
 cv2.imshow('Resized', resized)
 cv2.waitKey(0)
 
 gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-
+# gray_blur = cv2.GaussianBlur(gray, (3, 3), 1)
 gray_blur = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
 
 cv2.imshow('Gray', gray)
@@ -40,19 +40,28 @@ contours_score, hierarchy_score = cv2.findContours(cont_score, cv2.RETR_TREE, cv
 black_score = np.zeros(gray.shape) 
 
 scorecopy = resized.copy()
+score_rings = 0
 
+thresh = 2
+major_prev = 0
 for score_circles in contours_score:
   area = cv2.contourArea(score_circles)
   if area < 100:
-      continue
-
+    continue
   if len(score_circles) < 5:
-      continue
-
-  drawMinEnclose(scorecopy,score_circles)
+    continue
+  
+  #drawMinEnclose(scorecopy,score_circles)
   ellipse = cv2.fitEllipse(score_circles)
-  cv2.ellipse(black_score, ellipse, (255,0,0), 2, 2)
-
+  ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+  if abs(major_axis - major_prev) < thresh:
+    continue
+  major_prev = major_axis
+  print(ellipse)
+  score_rings += 1
+  cv2.ellipse(black_score, ellipse, (255,0,0), 1, cv2.LINE_8)
+  cv2.ellipse(scorecopy, ellipse, (255,0,0), 1, cv2.LINE_8)
+print(score_rings)
 cv2.imshow('Contours Score', scorecopy)
 cv2.waitKey(0)
 cv2.imshow('Black Score', black_score)
