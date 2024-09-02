@@ -9,24 +9,24 @@ def drawMinEnclose(resized,circles):
     cv2.circle(resized,center,radius-1,(0,255,0),2)
 
 imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
-# imgFile = cv2.imread("TargetPhotos/20130826_191912.jpg", 1)
+# imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
 resized = cv2.resize(imgFile,(500,500))
-cv2.imshow('Resized', resized)
-cv2.waitKey(0)
+# cv2.imshow('Resized', resized)
+# cv2.waitKey(0)
 
 gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 # gray_blur = cv2.GaussianBlur(gray, (3, 3), 1)
 gray_blur = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
 
-cv2.imshow('Gray', gray)
-cv2.waitKey(0)
-cv2.imshow('Gray Blur', gray_blur)
-cv2.waitKey(0)
+# cv2.imshow('Gray', gray)
+# cv2.waitKey(0)
+# cv2.imshow('Gray Blur', gray_blur)
+# cv2.waitKey(0)
 
 ret, threshscore = cv2.threshold(gray_blur, 120, 255, cv2.THRESH_BINARY)
 
-cv2.imshow("Thresholding Score", threshscore)
-cv2.waitKey(0)
+# cv2.imshow("Thresholding Score", threshscore)
+# cv2.waitKey(0)
 
 
 # kernel = np.ones((3, 3), np.uint8)
@@ -44,6 +44,7 @@ score_rings = 0
 
 thresh = 2
 major_prev = 0
+
 for score_circles in contours_score:
   area = cv2.contourArea(score_circles)
   if area < 100:
@@ -62,9 +63,11 @@ for score_circles in contours_score:
   cv2.ellipse(black_score, ellipse, (255,0,0), 1, cv2.LINE_8)
   cv2.ellipse(scorecopy, ellipse, (255,0,0), 1, cv2.LINE_8)
 print(score_rings)
+
 cv2.imshow('Contours Score', scorecopy)
 cv2.waitKey(0)
 cv2.imshow('Black Score', black_score)
+cv2.imwrite('black_score.jpg', black_score)
 cv2.waitKey(0)
 
 # byteMask = np.asarray(black, dtype=np.uint8)

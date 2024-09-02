@@ -2,3 +2,5 @@
 TargetPhotos/
 #Zip files
 *.zip
+#ignore the venve folder
+venv/

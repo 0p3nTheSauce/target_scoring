@@ -8,7 +8,7 @@ image = np.zeros((400, 400, 3), dtype=np.uint8)
 center = (200, 200)
 
 # Define the axes lengths (major and minor axes)
-axes = (75, 50)
+axes = (250, 200)
 
 # Define the angle of rotation
 angle = 90
@@ -25,6 +25,9 @@ thickness = 2
 
 # Draw the ellipse
 cv2.ellipse(image, center, axes, angle, startAngle, endAngle, color, thickness)
+radius = 50
+color2 = (255, 0, 0)  # Blue
+cv2.circle(image, center, radius, color2, thickness, cv2.LINE_8)
 
 # Display the image
 cv2.imshow("Ellipse", image)
