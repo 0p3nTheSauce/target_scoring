@@ -14,6 +14,13 @@ def filter(diffs_rings):
       new_diffs.append(diffs_rings[i])
   return new_diffs
 
+def calculate_diffs(radii):
+  diffs = []
+  for i in range(1, len(radii)):
+    diffs.append(radii[i-1] - radii[i])
+  filtered = filter(diffs)
+  return filtered
+
 def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
   #Fill in the missing rings
   if len(ideal_radii) == len(original_radii):
@@ -32,7 +39,7 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
   
   #First handle the first two rings
   
-  #Get last element of mapped diffs ,should be smallest
+  #Get last element of original diffs ,should be smallest
   first_diff = original_diffs[-1]
   smallest = min(original_diffs)
   if first_diff != smallest: 
@@ -63,15 +70,106 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
       smlst_ring = (most_common_diff / 58) * 22 #rough estimate
       scnd_smlst_ring = (smlst_ring / 22 ) * 42
       mapped_radii.extend([scnd_smlst_ring, smlst_ring]) 
-  mapped_radii.sort()
-  mapped_radii.reverse()
-  #calculate diffs
-  for i in range(1, len(mapped_radii)):
-    mapped_diffs.append(abs(mapped_radii[i-1] - mapped_radii[i]))
-  #filter
-  mapped_diffs = filter(mapped_diffs)
+    #Prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+  else:
+    mapped_diffs.extend(original_diffs)
+  
   #Now we can handle the next 6 rings. They should have the most common difference
   #Starting one ring at a time and fixing efficiency later
+  
+  #get the second last element of original diffs. should be somewhere in the range of 
+  #the most common difference
+  threshold = most_common_diff * 0.1
+  second_last_diff = mapped_diffs[-2]
+  if abs(second_last_diff - most_common_diff) > threshold:
+    #We are missing the 3rd ring
+    missing_rings[-3] = True
+    #generate the 3rd ring
+    third_ring = round((mapped_radii[-2] + mapped_radii[-3]) / 2)#rougly the average of the 2nd and 4th ring
+    mapped_radii.append(third_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  #The next 5 diffs shoud be the most common difference
+  
+  #get the third last element of original diffs.
+  third_last_diff = mapped_diffs[-3]
+  if third_last_diff != most_common_diff:
+    #We are missing the 4th ring
+    missing_rings[-4] = True
+    #generate the 4th ring
+    fourth_ring = mapped_radii[-3] + most_common_diff
+    mapped_radii.append(fourth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+  
+  #get the fourth last element of original diffs.
+  fourth_last_diff = mapped_diffs[-4]
+  if fourth_last_diff != most_common_diff:
+    #We are missing the 5th ring
+    missing_rings[-5] = True
+    #generate the 5th ring
+    fifth_ring = mapped_radii[-4] + most_common_diff
+    mapped_radii.append(fifth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+  
+  #get the fifth last element of original diffs.
+  fifth_last_diff = mapped_diffs[-5]
+  if fifth_last_diff != most_common_diff:
+    #We are missing the 6th ring
+    missing_rings[-6] = True
+    #generate the 6th ring
+    sixth_ring = mapped_radii[-5] + most_common_diff
+    mapped_radii.append(sixth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  #get the sixth last element of original diffs.
+  sixth_last_diff = mapped_diffs[-6]
+  if sixth_last_diff != most_common_diff:
+    #We are missing the 7th ring
+    missing_rings[-7] = True
+    #generate the 7th ring
+    seventh_ring = mapped_radii[-6] + most_common_diff
+    mapped_radii.append(seventh_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  #get the seventh last element of original diffs.
+  seventh_last_diff = mapped_diffs[-7]
+  if seventh_last_diff != most_common_diff:
+    #We are missing the 8th ring
+    missing_rings[-8] = True
+    #generate the 8th ring
+    eighth_ring = mapped_radii[-7] + most_common_diff
+    mapped_radii.append(eighth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  
   
       
   #quick test to see if this is working so far
@@ -182,17 +280,47 @@ print("Score Rings: ", score_rings_o)
 
 
 ##########################################Fill In##########################################
+# filled_in = np.zeros(ideal.shape, np.uint8)
+# filled_radii, filled_diffs = fill_in_missing(radii_i, diffs_rings_i, radii_o, diffs_rings_o)
+# for rad in filled_radii:
+#   ellipse = (ideal_centre, (rad, rad), 0)
+#   cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
 filled_in = np.zeros(ideal.shape, np.uint8)
-filled_radii, filled_diffs = fill_in_missing(radii_i, diffs_rings_i, radii_o, diffs_rings_o)
-for rad in filled_radii:
+missing = np.zeros(ideal.shape, np.uint8)
+radii_m = []
+with open('missingr3_ellipses.txt', 'r') as file:
+  lines = file.readlines()
+ellipses_m = []
+for line in lines:
+  line = line.strip()  
+  # Convert the string to a tuple and add it to the list
+  ellipse = eval(line)
+  cv2.ellipse(missing, ellipse, colour, thickness, cv2.LINE_8)
+  ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+  radius = int((major_axis + minor_axis)//2)
+  radii_m.append(radius)
+  ellipses_m.append(ellipse)
+#reverse for consistency
+ellipses_m.reverse()
+radii_m.reverse()
+#Calculate the differences between the radii
+diffs_rings_m = []
+for i in range(1, len(radii_m)):
+  diffs_rings_m.append(radii_m[i-1] - radii_m[i])
+  
+filled_radii_m, filled_diffs_m = fill_in_missing(radii_i, diffs_rings_i, radii_m, diffs_rings_m)
+#filled_radii = fill_in_missing(radii_i, diffs_rings_i, radii_o, diffs_rings_o)
+for rad in filled_radii_m:
   ellipse = (ideal_centre, (rad, rad), 0)
   cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
-print("Filled In Rings ", filled_radii)
-print("Filled In diffs ", filled_diffs)
+  
+print("Filled In Rings ", filled_radii_m)
+print("Filled In diffs ", filled_diffs_m)
 ##########################################Display##########################################
 cv2.imshow("Original", thresh_o)
 cv2.imshow("Ideal", thresh_i)
 cv2.imshow("Mapped", mapped)
+cv2.imshow("Missing", missing)
 cv2.imshow("Filled In", filled_in)
 
 
