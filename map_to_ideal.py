@@ -169,8 +169,22 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
     #calculate diffs
     mapped_diffs = calculate_diffs(mapped_radii)
     
+  #the ninth ring is the sub ring, and has roughly half the most common difference
   
-  
+  #get the eighth last element of original diffs.
+  eighth_last_diff = mapped_diffs[-8]
+  if eighth_last_diff != (most_common_diff / 2):
+    #We are missing the 9th ring
+    missing_rings[-9] = True
+    #generate the 9th ring
+    ninth_ring = mapped_radii[-8] + (most_common_diff / 2)
+    mapped_radii.append(ninth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)    
+    
       
   #quick test to see if this is working so far
   print("Missing rings: ", missing_rings)
