@@ -83,17 +83,21 @@ for circle in contours_o:
   totcy_o += cy
 original_centre = (totcx_o//score_rings_o, totcy_o//score_rings_o)
 print("Original Centre: ", original_centre)
-print("Original Radii: ", radii_o)
 print("Score Rings: ", score_rings_o)
 print()
 
 ##########################################Mapping##########################################
+diffs_rings = [] #capture the differences between the radii
+#Calculate diffs
+for i in range(1, len(radii_o)):
+  diffs_rings.append(radii_o[i-1] - radii_o[i])
 print("Mapped Rings")
 for ellipses in mapped_ellipses:
   cv2.ellipse(mapped, ellipses, colour, thickness, cv2.LINE_8)
   print(ellipses)
 print("Mapped Centre: ", ideal_centre)
 print("Mapped Radii: ", radii_o)
+print("Distance between Rings: ", diffs_rings)
 print("Score Rings: ", score_rings_o)
 
 
