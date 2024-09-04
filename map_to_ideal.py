@@ -17,9 +17,7 @@ contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPL
 radii_i = []
 ideal_centre = ()
 score_rings_i = 0
-dist_rings = [] #capture the differences between the radii
-prev_radius = 0
-curr_radius = 0
+diffs_rings = [] #capture the differences between the radii
 print("Ideal Rings")
 with open('ideal_ellipses.txt', 'r') as file:
   lines = file.readlines()
@@ -29,10 +27,8 @@ for line in lines:
   # Convert the string to a tuple and add it to the list
   ellipse = eval(line)
   ((cx, cy), (major_axis, minor_axis), angle) = ellipse
-  curr_radius = int((major_axis + minor_axis)//2)
-  radii_i.append(curr_radius)
-  dist_rings.append(curr_radius - prev_radius)
-  prev_radius = curr_radius
+  radius = int((major_axis + minor_axis)//2)
+  radii_i.append(radius)
   ellipses.append(ellipse)
 ideal_centre = (cx, cy)
 score_rings_i = len(ellipses)
@@ -40,13 +36,15 @@ score_rings_i = len(ellipses)
 #reverse for consistency
 ellipses.reverse()
 radii_i.reverse()
-#Remove first dist
-dist_rings.pop(0)
+#Calculate the differences between the radii
+for i in range(1, len(radii_i)):
+  diffs_rings.append(radii_i[i-1] - radii_i[i])
+
 for ellipse in ellipses:
   print(ellipse) 
 print("Ideal Centre: ", ideal_centre)
 print("Ideal Radii: ", radii_i)
-print("Distance between Rings: ", dist_rings)
+print("Distance between Rings: ", diffs_rings)
 print("Score Rings: ", score_rings_i)
 print()
 
