@@ -20,7 +20,8 @@ thresh = 2
 major_prev = 0
 score_rings_i = 0
 radii_i = []
-mapped_ie = np.zeros(ideal.shape, np.uint8)
+
+
 print("Ideal Rings")
 for circle in contours_i:
   if len(circle) < 5:
@@ -32,7 +33,7 @@ for circle in contours_i:
   radii_i.append(int((major_axis + minor_axis)//2))
   major_prev = major_axis
   print(ellipse)
-  cv2.ellipse(mapped_ie, ellipse, (255,0,0), 1, cv2.LINE_8)
+  # cv2.ellipse(mapped_ie, ellipse, (255,0,0), 1, cv2.LINE_8)
   score_rings_i += 1
   totcx_i += cx
   totcy_i += cy
@@ -43,12 +44,17 @@ print("Score Rings: ", score_rings_i)
 print()
 
 ##########################################Original##########################################
-
+#Attributes
 major_prev = 0
 totcx_o = 0
 totcy_o = 0
 score_rings_o = 0
 radii_o = []
+radius = 0
+#Mapped Image
+mapped = np.zeros(ideal.shape, np.uint8)
+colour = (255, 0, 0)
+thickness = 1
 
 print("Original Rings")
 for circle in contours_o:
@@ -58,9 +64,12 @@ for circle in contours_o:
   ((cx, cy), (major_axis, minor_axis), angle) = ellipse
   if abs(major_axis - major_prev) < thresh:
     continue
-  radii_o.append(int((major_axis + minor_axis)//2))
+  radius= int((major_axis + minor_axis)//2)
+  radii_o.append(radius)
   major_prev = major_axis
   print(ellipse)
+  mapped_ellipse = (ideal_centre, (radius, radius), 0)
+  cv2.ellipse(mapped, mapped_ellipse, colour, thickness, cv2.LINE_8)
   score_rings_o += 1
   totcx_o += cx
   totcy_o += cy
@@ -72,14 +81,7 @@ print()
 
 ##########################################Mapping##########################################
 
-mapped = np.zeros(ideal.shape, np.uint8)
-mapped_ic = np.zeros(ideal.shape, np.uint8)
-colour = (255, 255, 255) #White
-thickness = 1
-for i in range(score_rings_o):
-  cv2.circle(mapped, ideal_centre, radii_o[i], colour, thickness, cv2.LINE_8)
-for i in range(score_rings_i):
-  cv2.circle(mapped_ic, ideal_centre, radii_i[i], colour, thickness, cv2.LINE_8)
+
 cv2.imshow("Original", thresh_o)
 cv2.imshow("Ideal", thresh_i)
 cv2.imshow("Mapped", mapped)
@@ -90,8 +92,6 @@ cv2.imshow("Mapped", mapped)
 
 
 
-cv2.imshow("Mapped_ic", mapped_ic)
-cv2.imshow("Mapped_ie", mapped_ie)
 cv2.waitKey(0)
 # cv2.imshow("Mapped", mapped)
 # cv2.waitKey(0)
