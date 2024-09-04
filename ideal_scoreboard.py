@@ -114,10 +114,10 @@ def missing(img, x, y):
   # ellipses.append(ellipse)
   # cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
   #Second ring
-  radius2 = 42
-  ellipse = (centre, (radius2, radius2), 0)
-  ellipses.append(ellipse)
-  cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  # radius2 = 42
+  # ellipse = (centre, (radius2, radius2), 0)
+  # ellipses.append(ellipse)
+  # cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
   #Third ring onwards
   radius3 = 112
   r = 2
@@ -132,7 +132,7 @@ def missing(img, x, y):
       ellipse = (centre, (radius3+36, radius3+36), 0)
       ellipses.append(ellipse)
       cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
-  cv2.imwrite("missing_r1.jpg", img)
+  cv2.imwrite("missing_r1r2.jpg", img)
   ellipses.sort()
   return ellipses
   
@@ -155,6 +155,6 @@ gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 #   for ellipse in ellipses:
 #     f.write(str(ellipse) + "\n")
 ellipses = missing(image, x, y)
-with open("missingr1_ellipses.txt", "w") as f:
+with open("missingr1r2_ellipses.txt", "w") as f:
   for ellipse in ellipses:
     f.write(str(ellipse) + "\n")

@@ -14,6 +14,62 @@ def filter(diffs_rings):
       new_diffs.append(diffs_rings[i])
   return new_diffs
 
+def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
+  #Fill in the missing rings
+  if len(ideal_radii) == len(original_radii):
+    return original_radii
+  mapped_radii = []
+  mapped_diffs = []
+  num_diff_r1r2 = 1 #difference between first ring and second ring
+  num_diff_r2r3 = 1 #difference between second ring and third ring
+  num_diff_r8r9r10 = 2 #difference between 8th ring and 9th ring and 9th ring and 10th ring
+  num_diff_r3r8 = 5 #difference between 3rd ring and 8th ring
+  num_diff_r10r12 = 2 #difference between 10th ring and 12th ring
+  missing_rings = [False]*12
+  #This should be one of the differences between the 3rd and 8th ring
+  most_common_diff = Counter(original_diffs).most_common(1)[0][0]
+  
+  #First handle the first two rings
+  
+  #Get last element of mapped diffs ,should be smallest
+  first_diff = original_diffs[-1]
+  smallest = min(original_diffs)
+  if first_diff == smallest: #First two rings must be correct
+    mapped_diffs.append(first_diff)
+    mapped_radii.extend([original_radii[-2], original_radii[-1]])
+  else:
+    #the smallest and second smallest ring should be smaller than the most common difference
+    smlst_av_ring = original_radii[-1] #smallest available ring
+    scnd_smlst_av_ring = original_radii[-2] #second smallest available ring
+    if smlst_av_ring < most_common_diff:
+      #We are either missing the smallest ring or the second smallest ring
+      #The smallest ring should be less than half the most common difference (between 3rd and 8th rings)
+      #(Additionally if we are missing the second ring then scnd_smlst_ring < most_common_diff == False) 
+      if smlst_av_ring < (most_common_diff / 2):
+        #generate the second smallest ring
+        missing_rings[-2] = True
+        smlst_ring = smlst_av_ring
+        scnd_smlst_ring = (smlst_ring / 22 ) * 42 #rough estimate
+      else:
+        #generate the smallest ring
+        missing_rings[-1] = True
+        scnd_smlst_ring = smlst_av_ring
+        smlst_ring = (scnd_smlst_ring / 42) * 22
+    else:
+      #We are missing the first two rings 
+      #generate the first two rings
+      missing_rings[-1] = True
+      missing_rings[-2] = True
+      smlst_ring = (most_common_diff / 58) * 22 #rough estimate
+      scnd_smlst_ring = (smlst_ring / 22 ) * 42
+    mapped_radii.extend([scnd_smlst_ring, smlst_ring]) 
+      
+  #quick test to see if this is working so far
+  print("Missing rings: ", missing_rings)
+  mapped_radii.extend(original_radii)
+  mapped_radii.sort()
+  return mapped_radii
+
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
 # resized_o = cv2.resize(original, ideal.shape)
@@ -115,61 +171,7 @@ diffs_rings = filter(diffs_rings_o)
 print("Filtered Distance between Rings: ", diffs_rings)
 print("Score Rings: ", score_rings_o)
 
-def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
-  #Fill in the missing rings
-  if len(ideal_radii) == len(original_radii):
-    return original_radii
-  mapped_radii = []
-  mapped_diffs = []
-  num_diff_r1r2 = 1 #difference between first ring and second ring
-  num_diff_r2r3 = 1 #difference between second ring and third ring
-  num_diff_r8r9r10 = 2 #difference between 8th ring and 9th ring and 9th ring and 10th ring
-  num_diff_r3r8 = 5 #difference between 3rd ring and 8th ring
-  num_diff_r10r12 = 2 #difference between 10th ring and 12th ring
-  missing_rings = [False]*12
-  #This should be one of the differences between the 3rd and 8th ring
-  most_common_diff = Counter(original_diffs).most_common(1)[0][0]
-  
-  #First handle the first two rings
-  
-  #Get last element of mapped diffs ,should be smallest
-  first_diff = original_diffs[-1]
-  smallest = min(original_diffs)
-  if first_diff == smallest: #First two rings must be correct
-    mapped_diffs.append(first_diff)
-    mapped_radii.extend([original_radii[-2], original_radii[-1]])
-  else:
-    #the smallest and second smallest ring should be smaller than the most common difference
-    smlst_av_ring = original_radii[-1] #smallest available ring
-    scnd_smlst_av_ring = original_radii[-2] #second smallest available ring
-    if smlst_av_ring < most_common_diff:
-      #We are either missing the smallest ring or the second smallest ring
-      #The smallest ring should be less than half the most common difference (between 3rd and 8th rings)
-      #(Additionally if we are missing the second ring then scnd_smlst_ring < most_common_diff == False) 
-      if smlst_av_ring < (most_common_diff / 2):
-        #generate the second smallest ring
-        missing_rings[-2] = True
-        smlst_ring = smlst_av_ring
-        scnd_smlst_ring = (smlst_ring / 22 ) * 42 #rough estimate
-      else:
-        #generate the smallest ring
-        missing_rings[-1] = True
-        scnd_smlst_ring = smlst_av_ring
-        smlst_ring = (scnd_smlst_ring / 42) * 22
-    else:
-      #We are missing the first two rings 
-      #generate the first two rings
-      missing_rings[-1] = True
-      missing_rings[-2] = True
-      smlst_ring = (most_common_diff / 58) * 22 #rough estimate
-      scnd_smlst_ring = (smlst_ring / 22 ) * 42
-    mapped_radii.extend([scnd_smlst_ring, smlst_ring]) 
-      
-  #quick test to see if this is working so far
-  print(missing_rings)
-  mapped_radii.extend(original_radii[:-1])
-  mapped_radii.sort()
-  return mapped_radii
+
 
 filled_in = np.zeros(ideal.shape, np.uint8)
 filled_radii = fill_in_missing(radii_i, diffs_rings_i, radii_o, diffs_rings_o)
