@@ -374,6 +374,10 @@ for rad in filled_radii_m:
   
 print("Filled In Rings ", filled_radii_m)
 print("Filled In diffs ", filled_diffs_m)
+#TODO: Try with multiple missing rings
+#TODO: Add some error handling for list indexing
+#TODO: Figure out minimum number of rings needed to fill in the missing rings
+
 ##########################################Display##########################################
 cv2.imshow("Original", thresh_o)
 cv2.imshow("Ideal", thresh_i)
