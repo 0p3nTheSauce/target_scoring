@@ -142,10 +142,10 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
     #the smallest and second smallest ring should be smaller than the most common difference
     smlst_av_ring = original_radii[-1] #smallest available ring
     scnd_smlst_av_ring = original_radii[-2] #second smallest available ring
-    if scnd_smlst_av_ring < most_common_diff:
+    if smlst_av_ring < most_common_diff:
       #We are either missing the smallest ring or the second smallest ring
-      
       #The smallest ring should be less than half the most common difference (between 3rd and 8th rings)
+      #(Additionally if we are missing the second ring then scnd_smlst_ring < most_common_diff == False) 
       if smlst_av_ring < (most_common_diff / 2):
         #generate the second smallest ring
         missing_rings[-2] = True

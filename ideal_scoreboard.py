@@ -102,6 +102,39 @@ def ideal_centred_ellipse(img, x, y):
   cv2.imwrite("ideal_map_ellipse.jpg", img)
   ellipses.sort()
   return ellipses
+
+def missing(img, x, y):
+  ellipses = []
+  centre = (x // 2, y // 2)
+  color = (0, 255, 0) #Blue ish green
+  thickness = 1
+  #First ring
+  # radius1 = 22
+  # ellipse = (centre, (radius1, radius1), 0)
+  # ellipses.append(ellipse)
+  # cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  #Second ring
+  radius2 = 42
+  ellipse = (centre, (radius2, radius2), 0)
+  ellipses.append(ellipse)
+  cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  #Third ring onwards
+  radius3 = 112
+  r = 2
+  for i in range(9):
+    ellipse = (centre, (radius3, radius3), 0)
+    ellipses.append(ellipse)
+    cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+    r += 1
+    radius3 += 72
+    if r == 7:
+      #The 4-3 inner ring
+      ellipse = (centre, (radius3+36, radius3+36), 0)
+      ellipses.append(ellipse)
+      cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  cv2.imwrite("missing_r1.jpg", img)
+  ellipses.sort()
+  return ellipses
   
 x, y = 700, 700
 
@@ -117,8 +150,11 @@ gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 #ideal_centred(image, x, y)
 
 #ideal_ellipses(gray)
-ellipses = ideal_centred_ellipse(image, x, y)
-with open("ideal_ellipses.txt", "w") as f:
+# ellipses = ideal_centred_ellipse(image, x, y)
+# with open("ideal_ellipses.txt", "w") as f:
+#   for ellipse in ellipses:
+#     f.write(str(ellipse) + "\n")
+ellipses = missing(image, x, y)
+with open("missingr1_ellipses.txt", "w") as f:
   for ellipse in ellipses:
     f.write(str(ellipse) + "\n")
-
