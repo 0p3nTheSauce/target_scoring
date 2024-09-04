@@ -288,7 +288,7 @@ print("Score Rings: ", score_rings_o)
 filled_in = np.zeros(ideal.shape, np.uint8)
 missing = np.zeros(ideal.shape, np.uint8)
 radii_m = []
-with open('missingr3_ellipses.txt', 'r') as file:
+with open('test_missing/missingr9_ellipses.txt', 'r') as file:
   lines = file.readlines()
 ellipses_m = []
 for line in lines:
