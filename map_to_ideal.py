@@ -185,7 +185,51 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
     #calculate diffs
     mapped_diffs = calculate_diffs(mapped_radii)    
     
-      
+  #the tenth ring would also have half the most common difference, between the 9th(sub) and 10th ring
+  
+  #get the ninth last element of original diffs.
+  ninth_last_diff = mapped_diffs[-9]
+  if ninth_last_diff != (most_common_diff / 2):
+    #We are missing the 10th ring
+    missing_rings[-10] = True
+    #generate the 10th ring
+    tenth_ring = mapped_radii[-9] + (most_common_diff / 2)
+    mapped_radii.append(tenth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  #the 11th and 12 ring would have the most common difference
+  
+  #get the tenth last element of original diffs.
+  tenth_last_diff = mapped_diffs[-10]
+  if tenth_last_diff != most_common_diff:
+    #We are missing the 11th ring
+    missing_rings[-11] = True
+    #generate the 11th ring
+    eleventh_ring = mapped_radii[-10] + most_common_diff
+    mapped_radii.append(eleventh_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+    
+  #get the eleventh last element of original diffs. This might not exist
+  if len(mapped_diffs) < 11:
+    #We are missing the 12th ring
+    missing_rings[-12] = True
+    #generate the 12th ring
+    twelfth_ring = mapped_radii[-11] + most_common_diff
+    mapped_radii.append(twelfth_ring)
+    #prepare for next fill in
+    mapped_radii.sort()
+    mapped_radii.reverse()
+    #calculate diffs
+    mapped_diffs = calculate_diffs(mapped_radii)
+  
   #quick test to see if this is working so far
   print("Missing rings: ", missing_rings)
 
@@ -302,7 +346,7 @@ print("Score Rings: ", score_rings_o)
 filled_in = np.zeros(ideal.shape, np.uint8)
 missing = np.zeros(ideal.shape, np.uint8)
 radii_m = []
-with open('test_missing/missingr9_ellipses.txt', 'r') as file:
+with open('test_missing/missingr12_ellipses.txt', 'r') as file:
   lines = file.readlines()
 ellipses_m = []
 for line in lines:
