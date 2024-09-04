@@ -1,6 +1,18 @@
 import cv2 
 import numpy as np
 
+def filter(diffs_rings):
+  thresh = 1
+  new_diffs = []
+  new_diffs.append(diffs_rings[0])
+  for i in range(1, len(diffs_rings)):
+    if abs(diffs_rings[i] - diffs_rings[i-1]) <= thresh:
+      average = round((diffs_rings[i]+ diffs_rings[i-1])/2)
+      new_diffs.append(average)
+    else:
+      new_diffs.append(diffs_rings[i])
+  return new_diffs
+
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
 # resized_o = cv2.resize(original, ideal.shape)
@@ -97,10 +109,15 @@ for ellipses in mapped_ellipses:
   print(ellipses)
 print("Mapped Centre: ", ideal_centre)
 print("Mapped Radii: ", radii_o)
-print("Distance between Rings: ", diffs_rings)
+# print("Distance between Rings: ", diffs_rings)
+diffs_rings = filter(diffs_rings)
+print("Filtered Distance between Rings: ", diffs_rings)
 print("Score Rings: ", score_rings_o)
 
+# def fill_in_missing()
 
+
+      
 
 ##########################################Display##########################################
 cv2.imshow("Original", thresh_o)
