@@ -37,18 +37,29 @@ def get_bullet_holes(imgFile, show=False, verbose=False):
 		if len(circles) < 5:
 			continue
 		ellipse = cv2.fitEllipse(circles)
+		if show and verbose:
+			print(ellipse)
 		ellipses.append(ellipse)
-  	# drawMinEnclose(resized,circles)
+		# drawMinEnclose(resized,circles)
 		cv2.ellipse(resized, ellipse, (0,255,0), 2)
+	if show and verbose:
+		print("Num bullet holes: ", len(ellipses))
 	if show:
 		cv2.imshow('Contours', resized)
 		cv2.waitKey(0)
+	if show:
+		cv2.destroyAllWindows()
 	return ellipses
 	
 def main():
-	imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
-	get_bullet_holes(imgFile, show=True, verbose=True)
-	cv2.destroyAllWindows()
+	# if len(sys.argv) == 2:
+	# 	imgPath = sys.argv[1]
+	# else:
+	# 	imgPath = input("Enter the image file: ")
+	# imgFile = cv2.imread(imgPath, cv2.IMREAD_COLOR)
+	imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)	
+	bullet_holes = get_bullet_holes(imgFile, show=True, verbose=True)
+	
 
 if __name__ == '__main__':
 	main()
