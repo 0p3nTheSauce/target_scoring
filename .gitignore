@@ -4,3 +4,5 @@ TargetPhotos/
 *.zip
 #ignore the venve folder
 venv/
+#ignore everything in the experimentation folder
+experimentation/
