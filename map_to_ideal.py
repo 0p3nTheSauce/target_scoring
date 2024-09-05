@@ -80,6 +80,8 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
     mapped_radii.reverse()
     #calculate diffs
     mapped_diffs = calculate_diffs(mapped_radii)
+    print("Updated radii: ", mapped_radii)
+    print("Updated diffs: ", mapped_diffs)
   else:
     mapped_diffs.extend(original_diffs)
   
@@ -175,10 +177,9 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
     mapped_diffs = calculate_diffs(mapped_radii)
     
   #the ninth ring is the sub ring, and has roughly half the most common difference
-  
   #get the eighth last element of original diffs.
   eighth_last_diff = mapped_diffs[-8]
-  if eighth_last_diff != (most_common_diff / 2):
+  if abs(eighth_last_diff - (most_common_diff / 2)) > threshold:
     #We are missing the 9th ring
     missing_rings[-9] = True
     #generate the 9th ring
@@ -193,18 +194,36 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
   #the tenth ring would also have half the most common difference, between the 9th(sub) and 10th ring
   
   #get the ninth last element of original diffs.
-  ninth_last_diff = mapped_diffs[-9]
-  if ninth_last_diff != (most_common_diff / 2):
-    #We are missing the 10th ring
+  if len(mapped_diffs) < 9:
+    #We are missing the 10th ring onwards
     missing_rings[-10] = True
+    missing_rings[-11] = True
+    missing_rings[-12] = True
     #generate the 10th ring
     tenth_ring = mapped_radii[-9] + (most_common_diff / 2)
-    mapped_radii.append(tenth_ring)
+    #generate the 11th ring
+    eleventh_ring = tenth_ring + most_common_diff
+    #generate the 12th ring
+    twelfth_ring = eleventh_ring + most_common_diff
+    mapped_radii.extend([tenth_ring, eleventh_ring, twelfth_ring])
     #prepare for next fill in
     mapped_radii.sort()
     mapped_radii.reverse()
     #calculate diffs
     mapped_diffs = calculate_diffs(mapped_radii)
+  else:
+    ninth_last_diff = mapped_diffs[-9]
+    if abs(ninth_last_diff - (most_common_diff / 2)) > threshold:
+      #We are missing the 10th ring
+      missing_rings[-10] = True
+      #generate the 10th ring
+      tenth_ring = mapped_radii[-9] + (most_common_diff / 2)
+      mapped_radii.append(tenth_ring)
+      #prepare for next fill in
+      mapped_radii.sort()
+      mapped_radii.reverse()
+      #calculate diffs
+      mapped_diffs = calculate_diffs(mapped_radii)
     
   #the 11th and 12 ring would have the most common difference
   
@@ -326,17 +345,14 @@ print()
 ##########################################Mapping##########################################
 diffs_rings_o = [] #capture the differences between the radii
 #Calculate diffs
-for i in range(1, len(radii_o)):
-  diffs_rings_o.append(radii_o[i-1] - radii_o[i])
+diffs_rings_o = calculate_diffs(radii_o)
 print("Mapped Rings")
 for ellipses in mapped_ellipses:
   cv2.ellipse(mapped, ellipses, colour, thickness, cv2.LINE_8)
   print(ellipses)
 print("Mapped Centre: ", ideal_centre)
 print("Mapped Radii: ", radii_o)
-# print("Distance between Rings: ", diffs_rings)
-diffs_rings = filter(diffs_rings_o)
-print("Filtered Distance between Rings: ", diffs_rings)
+print("Filtered Distance between Rings: ", diffs_rings_o)
 print("Score Rings: ", score_rings_o)
 
 
@@ -347,10 +363,6 @@ for rad in filled_radii:
   ellipse = (ideal_centre, (rad, rad), 0)
   cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
 
-# filled_radii = fill_in_missing(radii_i, radii_o, diffs_rings_o)
-# for rad in filled_radii:
-#   ellipse = (ideal_centre, (rad, rad), 0)
-#   cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
   
 print("Filled In Rings ", filled_radii)
 print("Filled In diffs ", filled_diffs)
