@@ -21,6 +21,79 @@ def calculate_diffs(radii):
   filtered = filter(diffs)
   return filtered
 
+def fill_from(missing_rings, radii, most_common_diff, from_ring):
+  sixth_ring = 0
+  seventh_ring = 0
+  eighth_ring = 0
+  ninth_ring = 0
+  tenth_ring = 0
+  eleventh_ring = 0
+  twelfth_ring = 0
+  from_copy = from_ring.copy()
+  if from_ring == 6:
+    #We are missing the 6th ring onwards
+    missing_rings[-6] = True
+    #generate the 6th ring
+    sixth_ring = radii[-5] + most_common_diff
+    from_ring += 1
+  if from_ring == 7:
+    #We are missing the 7th ring onwards
+    missing_rings[-7] = True
+    #generate the 7th ring
+    if sixth_ring == 0:
+      sixth_ring = radii[-6] + most_common_diff
+    seventh_ring = sixth_ring + most_common_diff
+    from_ring += 1
+  if from_ring == 8:
+    #we are missing the 8th ring onwards
+    missing_rings[-8] = True
+    #generate the 8th ring
+    if seventh_ring == 0:
+      seventh_ring = radii[-7] + most_common_diff
+    eighth_ring = seventh_ring + most_common_diff
+    from_ring += 1
+  if from_ring == 9:
+    #We are missing the 9th ring onwards
+    missing_rings[-9] = True
+    #generate the 9th ring
+    if eighth_ring == 0:
+      eighth_ring = radii[-8] + most_common_diff
+    ninth_ring = eighth_ring + (most_common_diff / 2)
+    from_ring += 1
+  if from_ring == 10:
+    #we are missing the 10th ring onwards
+    missing_rings[-10] = True
+    #generate the 10th ring
+    if ninth_ring == 0:
+      ninth_ring = radii[-9] + (most_common_diff / 2)
+    tenth_ring = ninth_ring + (most_common_diff / 2)
+    from_ring += 1
+  if from_ring == 11:
+    #We are missing the 11th ring onwards
+    missing_rings[-11] = True
+    #generate the 11th ring
+    if tenth_ring == 0:
+      tenth_ring = radii[-10] + (most_common_diff / 2)
+    eleventh_ring = tenth_ring + most_common_diff
+    from_ring += 1
+  if from_ring == 12:
+    #We are missing the 12th ring
+    missing_rings[-12] = True
+    #generate the 12th ring
+    if eleventh_ring == 0:
+      eleventh_ring = radii[-11] + most_common_diff
+    twelfth_ring = eleventh_ring + most_common_diff
+  added_rings = [sixth_ring, seventh_ring, eighth_ring, ninth_ring, tenth_ring, eleventh_ring, twelfth_ring]
+  radii.extend(added_rings[from_copy:])
+  radii.sort()
+  radii.reverse()
+  #calculate diffs
+  diffs = calculate_diffs(radii)
+  return radii, diffs, missing_rings
+    
+  
+    
+
 def fill_in_missing(ideal_radii, original_radii, original_diffs):
   #TODO: Try with multiple missing rings
   #TODO: Make fillin more efficient, lots of repeated code
