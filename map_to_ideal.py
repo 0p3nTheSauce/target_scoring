@@ -21,18 +21,23 @@ def calculate_diffs(radii):
   filtered = filter(diffs)
   return filtered
 
-def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
+def fill_in_missing(ideal_radii, original_radii, original_diffs):
+  #TODO: Try with multiple missing rings
+  #TODO: Add some error handling for list indexing
+  #TODO: Figure out minimum number of rings needed to fill in the missing rings
+  #TODO: Make fillin more efficient, lots of repeated code
   #Fill in the missing rings
   if len(ideal_radii) == len(original_radii):
     return original_radii
   mapped_radii = []
   mapped_radii.extend(original_radii)
   mapped_diffs = []
-  num_diff_r1r2 = 1 #difference between first ring and second ring
-  num_diff_r2r3 = 1 #difference between second ring and third ring
-  num_diff_r8r9r10 = 2 #difference between 8th ring and 9th ring and 9th ring and 10th ring
-  num_diff_r3r8 = 5 #difference between 3rd ring and 8th ring
-  num_diff_r10r12 = 2 #difference between 10th ring and 12th ring
+  #Types of differences:
+  # - difference between first ring and second ring (unique) (smallest) (one)
+  # - difference between second ring and third ring (very similar to most common) (one)
+  # - differences between 3rd ring and 8th ring (most common) (five)
+  # - differences between 8th ring and 9th ring and 9th ring and 10th ring (half of most common) (two)
+  # - differences between the 10th ring and 12th ring (most common) (two)
   missing_rings = [False]*12
   #This should be one of the differences between the 3rd and 8th ring
   most_common_diff = Counter(original_diffs).most_common(1)[0][0]
@@ -230,9 +235,7 @@ def fill_in_missing(ideal_radii, ideal_diffs, original_radii, original_diffs):
     #calculate diffs
     mapped_diffs = calculate_diffs(mapped_radii)
   
-  #quick test to see if this is working so far
   print("Missing rings: ", missing_rings)
-
   return mapped_radii, mapped_diffs
 
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
@@ -374,9 +377,7 @@ for rad in filled_radii_m:
   
 print("Filled In Rings ", filled_radii_m)
 print("Filled In diffs ", filled_diffs_m)
-#TODO: Try with multiple missing rings
-#TODO: Add some error handling for list indexing
-#TODO: Figure out minimum number of rings needed to fill in the missing rings
+
 
 ##########################################Display##########################################
 cv2.imshow("Original", thresh_o)
