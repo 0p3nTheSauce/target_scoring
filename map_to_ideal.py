@@ -101,6 +101,8 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
 def fill_in_missing(ideal_radii, original_radii, original_diffs):
   #TODO: Try with multiple missing rings
   #TODO: Maybe mess around with filling from only 3 or 4 rings
+  #TODO: if say the 10th ring is missing, the algorithm adds most_common_diff / 2 to the 9th ring,
+  #      however a more accurate approach might be to add the second smallest difference
   #Fill in the missing rings
   if len(ideal_radii) == len(original_radii):
     return original_radii, original_diffs
@@ -248,7 +250,8 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
       #prepare for next fill in
       mapped_radii, mapped_diffs = reorder(mapped_radii)
     
-  #the ninth ring is the sub ring, and has roughly half the most common difference
+  #the ninth ring is the sub ring, and has roughly half the most common difference,
+  # between the 8th and 9th ring
   if len(mapped_diffs) < 8:
     #We are missing the 9th ring onwards
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii, most_common_diff, 9)
