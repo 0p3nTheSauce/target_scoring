@@ -103,7 +103,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   radii.extend(added_rings[from_added:])
   radii, diffs = reorder(radii)
   return radii, diffs, missing_rings
-    
+
   
 def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=None):
   #TODO: Try with multiple missing rings
@@ -288,7 +288,11 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
       mapped_radii.append(tenth_ring)
       #prepare for next fill in
       mapped_radii, mapped_diffs = reorder(mapped_radii)
-    
+  
+  #Add hoc correction of the distances between the subrings
+  if mapped_diffs[-9] != mapped_diffs[-8]:
+    mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii[-8:], most_common_diff, 9)
+  
   #the 11th and 12 ring would have the most common difference
   
   #get the tenth last element of original diffs.
