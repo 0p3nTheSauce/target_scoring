@@ -3,24 +3,31 @@ import numpy as np
 from collections import Counter
 import sys
 
-def filter(diffs_rings):
-  thresh = 1
-  new_diffs = []
-  new_diffs.append(diffs_rings[0])
-  for i in range(1, len(diffs_rings)):
-    if abs(diffs_rings[i] - diffs_rings[i-1]) <= thresh:
-      average = round((diffs_rings[i]+ diffs_rings[i-1])/2)
-      new_diffs.append(average)
-    else:
-      new_diffs.append(diffs_rings[i])
-  return new_diffs
+def normalise_diffs(diffs_rings):
+  #There should be max 4 different differences between the radii
+  thresh = 4
+  made_change = False
+  for i in range(len(diffs_rings)-1):
+    frst = diffs_rings[i]
+    scnd = diffs_rings[i+1]
+    diff = abs(frst - scnd)
+    
+    if 0 < diff and diff <= thresh:
+      made_change = True
+      average = round((diffs_rings[i]+ diffs_rings[i+1])/2)
+      diffs_rings[i] = average
+      diffs_rings[i+1] = average
+  if made_change:
+    return normalise_diffs(diffs_rings)
+  return diffs_rings
 
-def calculate_diffs(radii):
+def calculate_diffs(radii, normalise=True):
   diffs = []
   for i in range(1, len(radii)):
     diffs.append(radii[i-1] - radii[i])
-  filtered = filter(diffs)
-  return filtered
+  if normalise:
+    diffs = normalise_diffs(diffs)
+  return diffs
 
 def reorder(radii):
   #prepare for next fill in 
@@ -324,13 +331,17 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
   
   return mapped_radii, mapped_diffs
 
-def get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=False, verbose=False):
-  # original = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
-  # ideal = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
-  resized_o = cv2.resize(originalImg, (500, 500))
-  _, thresh_o = cv2.threshold(resized_o, 120, 255, cv2.THRESH_BINARY)
-  _, thresh_i = cv2.threshold(idealImg, 120, 255, cv2.THRESH_BINARY)
-  contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+def get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg=None, idealImg=None, verbose=False):
+  show = True
+  show_original = True
+  if idealImg is None:
+    show = False
+  if originalImg is None:
+    show_original = False
+  if verbose:
+    print("Mapping")
+    print()
+  #contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
   
   ##########################################Ideal##########################################
   #Attributes
@@ -338,9 +349,8 @@ def get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=False, verbose=Fa
   centre_i = ()
   score_rings_i = 0
   diffs_rings_i = [] #capture the differences between the radii
-  ellipses_i = []
   
-  if show and verbose:
+  if verbose:
     print("Ideal Rings")
   
   with open(idealPathTxt, 'r') as file:
@@ -349,23 +359,21 @@ def get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=False, verbose=Fa
     line = line.strip()  
     # Convert the string to a tuple and add it to the list
     ellipse = eval(line)
+    if verbose:
+      print(ellipse)
     ((cx, cy), (major_axis, minor_axis), angle) = ellipse
     radius = int((major_axis + minor_axis)//2)
     radii_i.append(radius)
-    ellipses_i.append(ellipse)
+    score_rings_i += 1
   centre_i = (cx, cy)
-  score_rings_i = len(ellipses_i)
   #reverse for consistency
-  ellipses_i.reverse()
   radii_i.reverse()
   #Calculate the differences between the radii
   for i in range(1, len(radii_i)):
     diffs_rings_i.append(radii_i[i-1] - radii_i[i])
   
   #Print the res
-  if show and verbose:
-    for ellipse in ellipses_i:
-      print(ellipse) 
+  if verbose:
     print("Ideal Centre: ", centre_i)
     print("Ideal Radii: ", radii_i)
     print("Distance between Rings: ", diffs_rings_i)
@@ -373,98 +381,83 @@ def get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=False, verbose=Fa
     print()
   
   ##########################################Original##########################################
-  #Attributes
-  major_prev = 0
+  #Attributess 
   totcx_o = 0
   totcy_o = 0
   score_rings_o = 0
   radii_o = []
-  radius = 0
-  thresh = 2
+  diffs_rings_o = []
   centre_o = ()
-  #Mapped Image
-  mapped = np.zeros(idealImg.shape, np.uint8)
-  colour = (255, 0, 0)
-  thickness = 1
-  mapped_ellipses = []
-  
-  if show and verbose:
+  if verbose:
     print("Original Rings")
-  for circle in contours_o:
-    if len(circle) < 5:
-      continue
-    ellipse = cv2.fitEllipse(circle)
-    ((cx, cy), (major_axis, minor_axis), angle) = ellipse
-    if abs(major_axis - major_prev) < thresh:
-      continue
-    radius= int((major_axis + minor_axis)//2)
-    radii_o.append(radius)
-    major_prev = major_axis
-    if show and verbose:
+  with open(originalPathTxt, 'r') as file:
+    lines = file.readlines()
+  for line in lines:
+    line = line.strip()  
+    # Convert the string to a tuple and add it to the list
+    ellipse = eval(line)
+    if verbose:
       print(ellipse)
-    mapped_ellipse = (centre_i, (radius, radius), 0)
-    mapped_ellipses.append(mapped_ellipse)
+    ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+    radius = int((major_axis + minor_axis)//2)
+    radii_o.append(radius)
     score_rings_o += 1
     totcx_o += cx
     totcy_o += cy
   centre_o = (totcx_o//score_rings_o, totcy_o//score_rings_o)
-  if show and verbose:
+  #sort and reverse (want to see original so don't normalise)
+  radii_o.sort()
+  radii_o.reverse()
+  diffs_rings_o = calculate_diffs(radii_o, normalise=False)
+  
+  if verbose:
     print("Original Centre: ", centre_o)
+    print("Original Radii: ", radii_o)
+    print("Distance between Rings: ", diffs_rings_o)
     print("Score Rings: ", score_rings_o)
     print()
   
-  ##########################################Mapping##########################################
-  diffs_rings_o = [] #capture the differences between the radii
-  #Calculate diffs
-  diffs_rings_o = calculate_diffs(radii_o)
-  if show and verbose:
-    print("Mapped Rings")
+  ##########################################Mapped##########################################
+  #Attributes
+  mapped_ellipses = []
+  diffs_rings_m = [] #capture the differences between the radii
   if show:
-    for ellipses in mapped_ellipses:
-      cv2.ellipse(mapped, ellipses, colour, thickness, cv2.LINE_8)
-      if verbose:
-        print(ellipses)
-  if show and verbose:
+    mapped = np.zeros(idealImg.shape, np.uint8)
+    colour = (255, 0, 0)
+    thickness = 1
+  
+  if verbose:
+    print("Mapped Rings")
+  for radius in radii_o:
+    ellipse = (centre_i, (radius, radius), 0)
+    if verbose:
+      print(ellipse)
+    if show:
+      cv2.ellipse(mapped, ellipse, colour, thickness, cv2.LINE_8)
+    mapped_ellipses.append(ellipse)
+  
+  #Calculate diffs
+  diffs_rings_m = calculate_diffs(radii_o)
+  
+  #Print the res
+  if verbose:
     print("Mapped Centre: ", centre_i)
     print("Mapped Radii: ", radii_o)
-    print("Filtered Distance between Rings: ", diffs_rings_o)
+    print("Distance between Rings: ", diffs_rings_m)
     print("Score Rings: ", score_rings_o)
-  
+    
   ##########################################Display##########################################
-  
+  if show_original:
+    cv2.imshow("Original", originalImg)
   if show:
-    cv2.imshow("Original", thresh_o)
-    cv2.imshow("Ideal", thresh_i)
+    cv2.imshow("Ideal", idealImg)
     cv2.imshow("Mapped", mapped)
     cv2.waitKey(0)
   
   ideal_attributes = (radii_i, diffs_rings_i, centre_i)
-  original_attributes = (radii_o, diffs_rings_o, centre_o)
+  mapped_attributes = (radii_o, diffs_rings_m, centre_i)
   
-  return ideal_attributes, original_attributes
-  
-  # ##########################################Fill In##########################################
-  # if show:
-  #   filled_in = np.zeros(ideal.shape, np.uint8)
-  # filled_radii, filled_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o)
-  # if show:
-  #   for rad in filled_radii:
-  #     ellipse = (centre_i, (rad, rad), 0)
-  #     cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
-  #   if verbose:
-  #     print("Filled In Rings ", filled_radii)
-  #     print("Filled In diffs ", filled_diffs)
-  
-  # ##########################################Display##########################################
-  # if show:
-  #   cv2.imshow("Original", thresh_o)
-  #   cv2.imshow("Ideal", thresh_i)
-  #   cv2.imshow("Mapped", mapped)
-  #   cv2.imshow("Filled In", filled_in)
-  #   cv2.waitKey(0)
-  #   cv2.destroyAllWindows()  
-  
-  # return filled_radii, filled_diffs
+  return ideal_attributes, mapped_attributes
   
 def main():
   # original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
@@ -475,24 +468,23 @@ def main():
   #   originalPath = input("Enter the original image file: ")
   #   idealPathImg = input("Enter the ideal image file: ")
   #   idealPathTxt = input("Enter the ideal text file: ")
-  originalPath = "black_score.jpg"
+  originalPathImg = "black_score.jpg"
   idealPathImg = "ideal_map_ellipse.jpg"
+  originalPathTxt = "original_ellipses.txt"
   idealPathTxt = "ideal_ellipses.txt"
   
-  originalImg = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
+  originalImg = cv2.imread(originalPathImg, cv2.IMREAD_GRAYSCALE)
   idealImg = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
   
   #Map
-  ideal_attributes, original_attributes = get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=True, verbose=True)
+  ideal_attributes, mapped_attributes = get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg, idealImg, verbose=True)
   radii_i, diffs_rings_i, centre_i = ideal_attributes
-  radii_o, diffs_rings_o, centre_o = original_attributes 
-  #The original attributes are essentially the mapped attributes, except they will use the 
-  # ideal centre i.e (radii_o, diffs_rings_o, centre_i)
+  radii_m, diffs_rings_m, centre_o = mapped_attributes 
   
   #Fill in
   showOriginal = False
   displayVars = (originalImg, idealImg.shape, centre_i, showOriginal)
-  map_fill_radii, map_fill_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o, displayVars)
+  map_fill_radii, map_fill_diffs = fill_in_missing(radii_i, radii_m, diffs_rings_m, displayVars)
   if map_fill_radii is not None:
     print("Rings filled successfully")
   
