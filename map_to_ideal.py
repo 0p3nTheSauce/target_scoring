@@ -98,7 +98,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   return radii, diffs, missing_rings
     
   
-def fill_in_missing(ideal_radii, original_radii, original_diffs):
+def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=None):
   #TODO: Try with multiple missing rings
   #TODO: Maybe mess around with filling from only 3 or 4 rings
   #TODO: if say the 10th ring is missing, the algorithm adds most_common_diff / 2 to the 9th ring,
@@ -111,7 +111,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
     #but better to be on the conservative side. Even 4 rings may not work
     #in all cases
     print("Not enough rings to reliably fill in")
-    return [], []
+    return None, None
   mapped_radii = []
   mapped_radii.extend(original_radii)
   mapped_diffs = []
@@ -160,8 +160,6 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
       mapped_radii.extend([scnd_smlst_ring, smlst_ring]) 
     #Prepare for next fill in
     mapped_radii, mapped_diffs = reorder(mapped_radii)
-    print("Updated radii: ", mapped_radii)
-    print("Updated diffs: ", mapped_diffs)
   else:
     mapped_diffs.extend(original_diffs)
   
@@ -306,15 +304,32 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
     #We are missing the 12th ring
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii, most_common_diff, 12)
   
-  print("Missing rings: ", missing_rings)
+  if displayVars is not None:
+    originalImg, shape, centre_i, showOriginal = displayVars
+    print("Missing rings: ", missing_rings)
+    print("Filled in rings: ", mapped_radii)
+    print("Filled in diffs: ", mapped_diffs)
+    filled_in = np.zeros(shape, np.uint8)
+    colour = (255, 0, 0)
+    thickness = 1
+    for rad in mapped_radii:
+      ellipse = (centre_i, (rad, rad), 0)
+      cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
+    if showOriginal:
+      cv2.imshow("Before filling in rings", originalImg)
+    cv2.imshow("After filling in rings", filled_in)
+    cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+  
+  
   return mapped_radii, mapped_diffs
 
-def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbose=False):
-  original = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
-  ideal = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
-  resized_o = cv2.resize(original, (500, 500))
+def get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=False, verbose=False):
+  # original = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
+  # ideal = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
+  resized_o = cv2.resize(originalImg, (500, 500))
   _, thresh_o = cv2.threshold(resized_o, 120, 255, cv2.THRESH_BINARY)
-  _, thresh_i = cv2.threshold(ideal, 120, 255, cv2.THRESH_BINARY)
+  _, thresh_i = cv2.threshold(idealImg, 120, 255, cv2.THRESH_BINARY)
   contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
   
   ##########################################Ideal##########################################
@@ -324,7 +339,6 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
   score_rings_i = 0
   diffs_rings_i = [] #capture the differences between the radii
   ellipses_i = []
-  
   
   if show and verbose:
     print("Ideal Rings")
@@ -367,8 +381,9 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
   radii_o = []
   radius = 0
   thresh = 2
+  centre_o = ()
   #Mapped Image
-  mapped = np.zeros(ideal.shape, np.uint8)
+  mapped = np.zeros(idealImg.shape, np.uint8)
   colour = (255, 0, 0)
   thickness = 1
   mapped_ellipses = []
@@ -392,9 +407,9 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
     score_rings_o += 1
     totcx_o += cx
     totcy_o += cy
-  original_centre = (totcx_o//score_rings_o, totcy_o//score_rings_o)
+  centre_o = (totcx_o//score_rings_o, totcy_o//score_rings_o)
   if show and verbose:
-    print("Original Centre: ", original_centre)
+    print("Original Centre: ", centre_o)
     print("Score Rings: ", score_rings_o)
     print()
   
@@ -415,28 +430,41 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
     print("Filtered Distance between Rings: ", diffs_rings_o)
     print("Score Rings: ", score_rings_o)
   
-  ##########################################Fill In##########################################
-  if show:
-    filled_in = np.zeros(ideal.shape, np.uint8)
-  filled_radii, filled_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o)
-  if show:
-    for rad in filled_radii:
-      ellipse = (centre_i, (rad, rad), 0)
-      cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
-    if verbose:
-      print("Filled In Rings ", filled_radii)
-      print("Filled In diffs ", filled_diffs)
-  
   ##########################################Display##########################################
+  
   if show:
     cv2.imshow("Original", thresh_o)
     cv2.imshow("Ideal", thresh_i)
     cv2.imshow("Mapped", mapped)
-    cv2.imshow("Filled In", filled_in)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()  
   
-  return filled_radii, filled_diffs
+  ideal_attributes = (radii_i, diffs_rings_i, centre_i)
+  original_attributes = (radii_o, diffs_rings_o, centre_o)
+  
+  return ideal_attributes, original_attributes
+  
+  # ##########################################Fill In##########################################
+  # if show:
+  #   filled_in = np.zeros(ideal.shape, np.uint8)
+  # filled_radii, filled_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o)
+  # if show:
+  #   for rad in filled_radii:
+  #     ellipse = (centre_i, (rad, rad), 0)
+  #     cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
+  #   if verbose:
+  #     print("Filled In Rings ", filled_radii)
+  #     print("Filled In diffs ", filled_diffs)
+  
+  # ##########################################Display##########################################
+  # if show:
+  #   cv2.imshow("Original", thresh_o)
+  #   cv2.imshow("Ideal", thresh_i)
+  #   cv2.imshow("Mapped", mapped)
+  #   cv2.imshow("Filled In", filled_in)
+  #   cv2.waitKey(0)
+  #   cv2.destroyAllWindows()  
+  
+  # return filled_radii, filled_diffs
   
 def main():
   # original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
@@ -450,7 +478,23 @@ def main():
   originalPath = "black_score.jpg"
   idealPathImg = "ideal_map_ellipse.jpg"
   idealPathTxt = "ideal_ellipses.txt"
-  map_fill_radii, map_fill_diffs = get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=True, verbose=True)
-    
+  
+  originalImg = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
+  idealImg = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
+  
+  #Map
+  ideal_attributes, original_attributes = get_map_to_ideal(originalImg, idealImg, idealPathTxt, show=True, verbose=True)
+  radii_i, diffs_rings_i, centre_i = ideal_attributes
+  radii_o, diffs_rings_o, centre_o = original_attributes 
+  #The original attributes are essentially the mapped attributes, except they will use the 
+  # ideal centre i.e (radii_o, diffs_rings_o, centre_i)
+  
+  #Fill in
+  showOriginal = False
+  displayVars = (originalImg, idealImg.shape, centre_i, showOriginal)
+  map_fill_radii, map_fill_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o, displayVars)
+  if map_fill_radii is not None:
+    print("Rings filled successfully")
+  
 if __name__ == '__main__':
   main()
