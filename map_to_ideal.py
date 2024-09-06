@@ -312,7 +312,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs):
 def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbose=False):
   original = cv2.imread(originalPath, cv2.IMREAD_GRAYSCALE)
   ideal = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
-  resized_o = cv2.resize(original, ideal.shape)
+  resized_o = cv2.resize(original, (500, 500))
   _, thresh_o = cv2.threshold(resized_o, 120, 255, cv2.THRESH_BINARY)
   _, thresh_i = cv2.threshold(ideal, 120, 255, cv2.THRESH_BINARY)
   contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -320,11 +320,11 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
   ##########################################Ideal##########################################
   #Attributes
   radii_i = []
-  ideal_centre = () 
+  centre_i = ()
   score_rings_i = 0
   diffs_rings_i = [] #capture the differences between the radii
   ellipses_i = []
-  centre_i = ()
+  
   
   if show and verbose:
     print("Ideal Rings")
@@ -452,7 +452,8 @@ def main():
   idealPathTxt = "ideal_ellipses.txt"
   map_fill_radii, map_fill_diffs = get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=True, verbose=True)
     
-
+main()
+quit()
 
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
