@@ -38,6 +38,7 @@ def reorder(radii):
   return radii, diffs
 
 def fill_from(missing_rings, radii, most_common_diff, from_ring):
+  half_most_common_diff = round(most_common_diff / 2)
   sixth_ring = 0
   seventh_ring = 0
   eighth_ring = 0
@@ -74,7 +75,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     #generate the 9th ring
     if eighth_ring == 0:
       eighth_ring = radii[-8] 
-    ninth_ring = eighth_ring + (most_common_diff / 2)
+    ninth_ring = eighth_ring + half_most_common_diff
     from_ring += 1
   if from_ring == 10:
     #we are missing the 10th ring onwards
@@ -82,7 +83,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     #generate the 10th ring
     if ninth_ring == 0:
       ninth_ring = radii[-9] 
-    tenth_ring = ninth_ring + (most_common_diff / 2)
+    tenth_ring = ninth_ring + half_most_common_diff
     from_ring += 1
   if from_ring == 11:
     #We are missing the 11th ring onwards
@@ -108,8 +109,10 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
 def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=None):
   #TODO: Try with multiple missing rings
   #TODO: Maybe mess around with filling from only 3 or 4 rings
-  #TODO: if say the 10th ring is missing, the algorithm adds most_common_diff / 2 to the 9th ring,
-  #      however a more accurate approach might be to add the second smallest difference
+  #TODO: Given the ad hoc mapping, it may be more efficient to simply work out the most common difference
+  # and fill the rest of the rings based on that. But that would put all the work i've done on this mess
+  # of a function to waste, and it may not fill the rings as nicely in all cases. And given the power of
+  # modern processors we are not exactly crying over a tiny bit of inefficiency
   #Fill in the missing rings
   if len(ideal_radii) == len(original_radii):
     return original_radii, original_diffs
@@ -131,7 +134,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
   missing_rings = [False]*12
   #This should be one of the differences between the 3rd and 8th ring
   most_common_diff = Counter(original_diffs).most_common(1)[0][0]
-  
+  half_most_common_diff = round(most_common_diff / 2)
   #First handle the first two rings
   
   #Get last element of original diffs ,should be smallest
@@ -140,30 +143,30 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
   if first_diff != smallest: 
     #the smallest and second smallest ring should be smaller than the most common difference
     smlst_av_ring = original_radii[-1] #smallest available ring
-    scnd_smlst_av_ring = original_radii[-2] #second smallest available ring
+    # scnd_smlst_av_ring = original_radii[-2] #second smallest available ring
     if smlst_av_ring < most_common_diff:
       #We are either missing the smallest ring or the second smallest ring
       #The smallest ring should be less than half the most common difference (between 3rd and 8th rings)
       #(Additionally if we are missing the second ring then scnd_smlst_ring < most_common_diff == False) 
-      if smlst_av_ring < (most_common_diff / 2):
+      if smlst_av_ring < half_most_common_diff:
         #generate the second smallest ring
         missing_rings[-2] = True
         smlst_ring = smlst_av_ring
-        scnd_smlst_ring = (smlst_ring / 22 ) * 42 #rough estimate
+        scnd_smlst_ring = round((smlst_ring / 22 ) * 42) #rough estimate
         mapped_radii.append(scnd_smlst_ring)
       else:
         #generate the smallest ring
         missing_rings[-1] = True
         scnd_smlst_ring = smlst_av_ring
-        smlst_ring = (scnd_smlst_ring / 42) * 22
+        smlst_ring = round((scnd_smlst_ring / 42) * 22)
         mapped_radii.append(smlst_ring)
     else:
       #We are missing the first two rings 
       #generate the first two rings
       missing_rings[-1] = True
       missing_rings[-2] = True
-      smlst_ring = (most_common_diff / 58) * 22 #rough estimate
-      scnd_smlst_ring = (smlst_ring / 22 ) * 42
+      smlst_ring = round((most_common_diff / 72) * 22) #rough estimate
+      scnd_smlst_ring = round((smlst_ring / 22 ) * 42)
       mapped_radii.extend([scnd_smlst_ring, smlst_ring]) 
     #Prepare for next fill in
     mapped_radii, mapped_diffs = reorder(mapped_radii)
@@ -185,7 +188,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
     mapped_radii.append(third_ring)
     #prepare for next fill in
     mapped_radii, mapped_diffs = reorder(mapped_radii)
-    
+  
   #The next 5 diffs shoud be the most common difference
   
   #get the third last element of original diffs.
@@ -263,11 +266,11 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
   else:
     #get the eighth last element of original diffs.
     eighth_last_diff = mapped_diffs[-8]
-    if abs(eighth_last_diff - (most_common_diff / 2)) > threshold:
+    if abs(eighth_last_diff - half_most_common_diff) > threshold:
       #We are missing the 9th ring
       missing_rings[-9] = True
       #generate the 9th ring
-      ninth_ring = mapped_radii[-8] + (most_common_diff / 2)
+      ninth_ring = mapped_radii[-8] + half_most_common_diff
       mapped_radii.append(ninth_ring)
       #prepare for next fill in
       mapped_radii, mapped_diffs = reorder(mapped_radii)  
@@ -280,17 +283,17 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii, most_common_diff, 10)
   else:
     ninth_last_diff = mapped_diffs[-9]
-    if abs(ninth_last_diff - (most_common_diff / 2)) > threshold:
+    if abs(ninth_last_diff - half_most_common_diff) > threshold:
       #We are missing the 10th ring
       missing_rings[-10] = True
       #generate the 10th ring
-      tenth_ring = mapped_radii[-9] + (most_common_diff / 2)
+      tenth_ring = mapped_radii[-9] + half_most_common_diff
       mapped_radii.append(tenth_ring)
       #prepare for next fill in
       mapped_radii, mapped_diffs = reorder(mapped_radii)
   
   #Add hoc correction of the distances between the subrings
-  if mapped_diffs[-9] != mapped_diffs[-8]:
+  if mapped_diffs[-9] != mapped_diffs[-8] != half_most_common_diff:
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii[-8:], most_common_diff, 9)
   
   #the 11th and 12 ring would have the most common difference
@@ -315,8 +318,22 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
     #We are missing the 12th ring
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii, most_common_diff, 12)
   
+  #Ad hoc correction of distances between the 1st 2nd and 3rd rings
+  ideal_first_diff = round((most_common_diff / 72) * 22)
+  ideal_second_diff = round((most_common_diff / 72) * 70)
+  if mapped_diffs[-2] != ideal_second_diff:
+    mapped_radii[-2] = mapped_radii[-3] - ideal_second_diff
+    mapped_radii[-1] = mapped_radii[-2] - ideal_first_diff
+    mapped_diffs[-2] = ideal_second_diff
+    mapped_diffs[-1] = ideal_first_diff
+  if mapped_diffs[-1] != ideal_first_diff:
+    mapped_radii[-1] = mapped_radii[-2] - ideal_first_diff
+    mapped_diffs[-1] = ideal_first_diff
+  
   if displayVars is not None:
     originalImg, shape, centre_i, showOriginal = displayVars
+    print("Filling in missing rings")
+    print()
     print("Missing rings: ", missing_rings)
     print("Filled in rings: ", mapped_radii)
     print("Filled in diffs: ", mapped_diffs)
@@ -449,6 +466,7 @@ def get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg=None, idealImg=N
     print("Mapped Radii: ", radii_o)
     print("Distance between Rings: ", diffs_rings_m)
     print("Score Rings: ", score_rings_o)
+    print()
     
   ##########################################Display##########################################
   if show_original:
