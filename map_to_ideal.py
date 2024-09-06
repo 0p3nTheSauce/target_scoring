@@ -38,7 +38,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   tenth_ring = 0
   eleventh_ring = 0
   twelfth_ring = 0
-  from_copy = from_ring
+  from_added = from_ring - 6 #added starts from the 6th ring
   if from_ring == 6:
     #We are missing the 6th ring onwards
     missing_rings[-6] = True
@@ -50,7 +50,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-7] = True
     #generate the 7th ring
     if sixth_ring == 0:
-      sixth_ring = radii[-6] + most_common_diff
+      sixth_ring = radii[-6] 
     seventh_ring = sixth_ring + most_common_diff
     from_ring += 1
   if from_ring == 8:
@@ -58,7 +58,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-8] = True
     #generate the 8th ring
     if seventh_ring == 0:
-      seventh_ring = radii[-7] + most_common_diff
+      seventh_ring = radii[-7] 
     eighth_ring = seventh_ring + most_common_diff
     from_ring += 1
   if from_ring == 9:
@@ -66,7 +66,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-9] = True
     #generate the 9th ring
     if eighth_ring == 0:
-      eighth_ring = radii[-8] + most_common_diff
+      eighth_ring = radii[-8] 
     ninth_ring = eighth_ring + (most_common_diff / 2)
     from_ring += 1
   if from_ring == 10:
@@ -74,7 +74,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-10] = True
     #generate the 10th ring
     if ninth_ring == 0:
-      ninth_ring = radii[-9] + (most_common_diff / 2)
+      ninth_ring = radii[-9] 
     tenth_ring = ninth_ring + (most_common_diff / 2)
     from_ring += 1
   if from_ring == 11:
@@ -82,7 +82,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-11] = True
     #generate the 11th ring
     if tenth_ring == 0:
-      tenth_ring = radii[-10] + (most_common_diff / 2)
+      tenth_ring = radii[-10] 
     eleventh_ring = tenth_ring + most_common_diff
     from_ring += 1
   if from_ring == 12:
@@ -90,10 +90,10 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
     missing_rings[-12] = True
     #generate the 12th ring
     if eleventh_ring == 0:
-      eleventh_ring = radii[-11] + most_common_diff
+      eleventh_ring = radii[-11] 
     twelfth_ring = eleventh_ring + most_common_diff
   added_rings = [sixth_ring, seventh_ring, eighth_ring, ninth_ring, tenth_ring, eleventh_ring, twelfth_ring]
-  radii.extend(added_rings[from_copy:])
+  radii.extend(added_rings[from_added:])
   radii, diffs = reorder(radii)
   return radii, diffs, missing_rings
     
