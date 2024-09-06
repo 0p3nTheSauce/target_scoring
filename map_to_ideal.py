@@ -1,6 +1,7 @@
 import cv2 
 import numpy as np
 from collections import Counter
+import sys
 
 def filter(diffs_rings):
   thresh = 1
@@ -37,7 +38,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   tenth_ring = 0
   eleventh_ring = 0
   twelfth_ring = 0
-  from_copy = from_ring.copy()
+  from_copy = from_ring
   if from_ring == 6:
     #We are missing the 6th ring onwards
     missing_rings[-6] = True
@@ -385,9 +386,71 @@ def get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=False, verbo
       print(ellipse)
     mapped_ellipse = (centre_i, (radius, radius), 0)
     mapped_ellipses.append(mapped_ellipse)
-    #TODO: continue here
+    score_rings_o += 1
+    totcx_o += cx
+    totcy_o += cy
+  original_centre = (totcx_o//score_rings_o, totcy_o//score_rings_o)
+  if show and verbose:
+    print("Original Centre: ", original_centre)
+    print("Score Rings: ", score_rings_o)
+    print()
   
+  ##########################################Mapping##########################################
+  diffs_rings_o = [] #capture the differences between the radii
+  #Calculate diffs
+  diffs_rings_o = calculate_diffs(radii_o)
+  if show and verbose:
+    print("Mapped Rings")
+  if show:
+    for ellipses in mapped_ellipses:
+      cv2.ellipse(mapped, ellipses, colour, thickness, cv2.LINE_8)
+      if verbose:
+        print(ellipses)
+  if show and verbose:
+    print("Mapped Centre: ", centre_i)
+    print("Mapped Radii: ", radii_o)
+    print("Filtered Distance between Rings: ", diffs_rings_o)
+    print("Score Rings: ", score_rings_o)
   
+  ##########################################Fill In##########################################
+  if show:
+    filled_in = np.zeros(ideal.shape, np.uint8)
+  filled_radii, filled_diffs = fill_in_missing(radii_i, radii_o, diffs_rings_o)
+  if show:
+    for rad in filled_radii:
+      ellipse = (centre_i, (rad, rad), 0)
+      cv2.ellipse(filled_in, ellipse, colour, thickness, cv2.LINE_8)
+    if verbose:
+      print("Filled In Rings ", filled_radii)
+      print("Filled In diffs ", filled_diffs)
+  
+  ##########################################Display##########################################
+  if show:
+    cv2.imshow("Original", thresh_o)
+    cv2.imshow("Ideal", thresh_i)
+    cv2.imshow("Mapped", mapped)
+    cv2.imshow("Filled In", filled_in)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()  
+  
+  return filled_radii, filled_diffs
+  
+def main():
+  # original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
+  # ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
+  # if len(sys.argv) == 4:
+  #   originalPath, idealPathImg, idealPathTxt = sys.argv[1], sys.argv[2], sys.argv[3]
+  # else:
+  #   originalPath = input("Enter the original image file: ")
+  #   idealPathImg = input("Enter the ideal image file: ")
+  #   idealPathTxt = input("Enter the ideal text file: ")
+  originalPath = "black_score.jpg"
+  idealPathImg = "ideal_map_ellipse.jpg"
+  idealPathTxt = "ideal_ellipses.txt"
+  map_fill_radii, map_fill_diffs = get_map_to_ideal(originalPath, idealPathImg, idealPathTxt, show=True, verbose=True)
+    
+
+
 original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
 # resized_o = cv2.resize(original, ideal.shape)
