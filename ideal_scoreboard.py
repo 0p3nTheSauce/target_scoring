@@ -70,10 +70,12 @@ def ideal_ellipses(img):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
  
-def ideal_centred_ellipse(img, x, y):
+def ideal_centred_ellipse(x, y, img=None, write=False):
+  if img is None:
+    img = np.zeros((x, y), dtype=np.uint8)
   ellipses = []
   centre = (x // 2, y // 2)
-  color = (0, 255, 0) #Blue ish green
+  color = 255 #White
   thickness = 1
   #First ring
   radius1 = 22
@@ -99,9 +101,10 @@ def ideal_centred_ellipse(img, x, y):
       ellipse = (centre, (radius3+36, radius3+36), 0)
       ellipses.append(ellipse)
       cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
-  cv2.imwrite("ideal_map_ellipse.jpg", img)
+  if write:
+    cv2.imwrite("ideal_map_ellipse.jpg", img)
   ellipses.sort()
-  return ellipses
+  return ellipses, img
 
 def missing(img, x, y):
   ellipses = []

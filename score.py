@@ -13,7 +13,7 @@ def main():
   imgFile = cv2.imread(imgPath, 1)
   bullet_holes = get_bullet_holes(imgFile, show=True, verbose=True)
   print()
-  
+  quit()
   print("Getting score lines")
   score_lines, centre_o = get_score_lines(imgFile, show=True, verbose=True, write=True)
   print()

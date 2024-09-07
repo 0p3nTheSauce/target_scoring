@@ -99,10 +99,16 @@ def circles_to_points(centre, radii, numpoints=100):
     return circle_points
 
 
-def visualise_points(image, points, point_color=255):
+def visualise_points(points, title="Points", show=False, shape=(700,700), image=None, point_color=255):
+  if image is None:
+    image = np.zeros(shape, dtype=np.uint8)
   for (x, y) in points:
     x, y = int(x), int(y)
     cv2.circle(image, (x, y), radius=1, color=point_color, thickness=-1)
+  if show:
+    cv2.imshow(title, image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
   return image
 
 def main():
@@ -167,6 +173,7 @@ def main():
 
 # Apply the rotation
   rotated_image = cv2.warpAffine(ideal_bullet, rotation_matrix, (700, 700))
+  
   cv2.imshow("Ideal bullet", rotated_image)
   
   

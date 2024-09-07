@@ -6,3 +6,5 @@ TargetPhotos/
 venv/
 #ignore everything in the experimentation folder
 experimentation/
+#ignore everything in the pychache folder
+__pycache__/
