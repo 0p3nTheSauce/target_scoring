@@ -70,7 +70,7 @@ def ideal_ellipses(img):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
  
-def ideal_centred_ellipse(x, y, img=None, write=False):
+def ideal_centred_ellipse(x, y, title="Ideal", show=False, img=None, write=False):
   if img is None:
     img = np.zeros((x, y), dtype=np.uint8)
   ellipses = []
@@ -103,6 +103,10 @@ def ideal_centred_ellipse(x, y, img=None, write=False):
       cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
   if write:
     cv2.imwrite("ideal_map_ellipse.jpg", img)
+  if show:
+    cv2.imshow(title, img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
   ellipses.sort()
   return ellipses, img
 
@@ -140,25 +144,26 @@ def missing(img, x, y):
   ellipses.sort()
   return ellipses
   
-x, y = 700, 700
+def main():
+  x, y = 700, 700
 
-# Create a blank image
-image = np.zeros((x, y, 3), dtype=np.uint8)
+  # Create a blank image
+  # image = np.zeros((x, y, 3), dtype=np.uint8)
 
-background = cv2.imread("ideal.jpg", 1)
+  # background = cv2.imread("ideal.jpg", 1)
 
-resized = cv2.resize(background,(500,500))
-gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+  # resized = cv2.resize(background,(500,500))
+  # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 
-#ideal(gray)
-#ideal_centred(image, x, y)
+  #ideal(gray)
+  #ideal_centred(image, x, y)
 
-#ideal_ellipses(gray)
-# ellipses = ideal_centred_ellipse(image, x, y)
-# with open("ideal_ellipses.txt", "w") as f:
-#   for ellipse in ellipses:
-#     f.write(str(ellipse) + "\n")
-ellipses = missing(image, x, y)
-with open("test_missing/missingr12_ellipses.txt", "w") as f:
+  #ideal_ellipses(gray)
+  # ellipses = ideal_centred_ellipse(image, x, y)
+  # with open("ideal_ellipses.txt", "w") as f:
+  #   for ellipse in ellipses:
+  #     f.write(str(ellipse) + "\n")
+  ellipses, img = ideal_centred_ellipse(700, 700)
   for ellipse in ellipses:
-    f.write(str(ellipse) + "\n")
+    print(ellipse)
+
