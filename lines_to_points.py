@@ -1,6 +1,32 @@
 import cv2
 import numpy as np
 
+def transform(source_points, destination_points, bullet_holes, verbose=False):
+  
+  if verbose:
+    print("Source Points Shape:", source_points.shape)
+    print("Destination Points Shape:", destination_points.shape)
+    print("Bullet Holes Shape:", bullet_holes.shape)
+    print()
+  source_points = np.array(source_points, dtype='float32').reshape(-1, 1, 2)
+  destination_points = np.array(destination_points, dtype='float32').reshape(-1, 1, 2)
+  bullet_holes = np.array(bullet_holes, dtype='float32').reshape(-1, 1, 2)
+  
+  if verbose:
+    print("Source Points Shape:", source_points.shape)
+    print("Destination Points Shape:", destination_points.shape)
+    print("Bullet Holes Shape:", bullet_holes.shape)
+  
+  H, status = cv2.findHomography(source_points, destination_points)
+  transformed_points = cv2.perspectiveTransform(bullet_holes, H)
+  
+  if verbose:
+    print("Homography matrix:")
+    print(H)
+    print()
+      
+  return transformed_points.reshape(-1, 2)
+
 def get_ellipses(path):
   ellipses = []
   with open(path, "r") as file:
@@ -38,7 +64,7 @@ def get_circle_points(centre, radius, num_points):
   x = cx + radius * np.cos(angles)
   y = cy + radius * np.sin(angles)
 
-  return np.stack((x, y), axis=-1)
+  return np.vstack((x, y)).T
 
 def get_ellipse_points(ellipse, num_points):
   ((cx, cy), (major, minor), theta) = ellipse
@@ -55,29 +81,29 @@ def get_ellipse_points(ellipse, num_points):
   return np.vstack((x, y)).T
 
 def ellipses_to_points(ellipse_array, numpoints=100):
-  ellipse_points = []
+  ellipse_points = np.empty((0, 2), dtype=np.float64)
   for ellipse in ellipse_array:
-    ellipse_points.append(get_ellipse_points(ellipse, numpoints))
+    points = get_ellipse_points(ellipse, numpoints)
+    ellipse_points = np.vstack((ellipse_points, points))
   return ellipse_points
 
 def circles_to_points(centre, radii, numpoints=100):
-  circle_points = []
-  for radius in radii:
-    circle_points.append(get_circle_points(centre, radius, numpoints))
-  return circle_points
+    # Start with an empty NumPy array
+    circle_points = np.empty((0, 2), dtype=np.float64)
 
-def visualise_points(image, points, point_color):
+    # Loop through each radius and add the points to the array
+    for radius in radii:
+        points = get_circle_points(centre, radius, numpoints)
+        circle_points = np.vstack((circle_points, points))
+
+    return circle_points
+
+
+def visualise_points(image, points, point_color=255):
   for (x, y) in points:
     x, y = int(x), int(y)
     cv2.circle(image, (x, y), radius=1, color=point_color, thickness=-1)
   return image
-  
-def visualise_all(array_points, title="Points", image_size=(700, 700), point_color=255):
-  image = np.zeros((image_size[0], image_size[1]), dtype=np.uint8)
-  for rings in array_points:
-    image = visualise_points(image, rings, point_color)
-  cv2.imshow(title, image)
-  cv2.waitKey(0)
 
 def main():
   print("Original")
@@ -89,17 +115,61 @@ def main():
   
   print("Ideal")
   ideal_map = np.zeros((700, 700), dtype=np.uint8)
-  path = "ideal_ellipses.txt"
+  # path = "ideal_ellipses.txt"
+  path = "mapped_ellipses.txt"
   centre, radii = get_circles(path)
   for radius in radii:
     print(centre, radius)
     cv2.circle(ideal_map, centre, radius, color=255, thickness=1)
   print()
   
+  a_bullet = ((268.5964050292969, 257.7123107910156), (12.312881469726562, 17.09013557434082), 103.4205093383789)
+  a_bullet2 = ((280.8199768066406, 224.81353759765625), (16.182527542114258, 20.5277042388916), 20.32695770263672)
+  a_bullet3 = ((252.96786499023438, 222.6781463623047), (14.28591537475586, 20.636219024658203), 8.740201950073242)
+  a_bullet_points1 = get_ellipse_points(a_bullet, 100)
+  a_bullet_points2 = get_ellipse_points(a_bullet2, 100)
+  a_bullet_points3 = get_ellipse_points(a_bullet3, 100)
+  a_bullet_points = np.vstack((a_bullet_points1, a_bullet_points2, a_bullet_points3))
+  
+  
   ellipse_points = ellipses_to_points(ellipses)  
   circle_points = circles_to_points(centre, radii)
-  visualise_all(ellipse_points, title="Original")
-  visualise_all(circle_points, title="Ideal")
+  original_image = np.zeros((700, 700), dtype=np.uint8)
+  ideal_image = original_image.copy()
+  bullet_image = original_image.copy()
+  original_bullet = original_image.copy()
+  mapped_bullet_image = original_image.copy()
+  ideal_bullet = original_image.copy()
+  
+  print()
+  mapped_bullet_points = transform(ellipse_points, circle_points, a_bullet_points)
+  
+  original_image = visualise_points(original_image, ellipse_points)
+  ideal_image = visualise_points(ideal_image, circle_points)
+  bullet_image = visualise_points(bullet_image, a_bullet_points)
+  mapped_bullet_image = visualise_points(mapped_bullet_image, mapped_bullet_points)
+  
+  original_bullet = visualise_points(original_image, a_bullet_points)
+  ideal_bullet = visualise_points(ideal_image, mapped_bullet_points)
+  
+  cv2.imshow("Original points", original_image)
+  cv2.imshow("Ideal points", ideal_image)
+  cv2.imshow("Bullet points", bullet_image)
+  cv2.imshow("Mapped bullet points", mapped_bullet_image)
+  
+  cv2.imshow("Original bullet", original_bullet)
+  
+  center = (350, 350)
+  angle = 270
+  scale = 1.0
+  # Compute the rotation matrix
+  rotation_matrix = cv2.getRotationMatrix2D(center, angle, scale)
+
+# Apply the rotation
+  rotated_image = cv2.warpAffine(ideal_bullet, rotation_matrix, (700, 700))
+  cv2.imshow("Ideal bullet", rotated_image)
+  
+  
   cv2.imshow("Ideal map", ideal_map)
   cv2.waitKey(0)
   cv2.destroyAllWindows()

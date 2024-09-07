@@ -4,18 +4,8 @@ import cv2
 from bullet_holes import get_bullet_holes
 from score_lines import get_score_lines
 from map_to_ideal import get_map_to_ideal, fill_in_missing, subtract_rings
-from lines_to_points import ellipses_to_points, circles_to_points, get_ellipses, visualise_all
+from lines_to_points import ellipses_to_points, circles_to_points, get_ellipses, visualise_points, transform
 
-def transform(source_points, destination_points, bullet_holes, verbose=False):
-  H, status = cv2.findHomography(source_points, destination_points)
-  transformed_points = cv2.perspectiveTransform(bullet_holes, H)
-  if verbose:
-    print("Homography matrix:")
-    print(H)
-    print()
-    print("Transformed points:", transformed_points)
-  return transformed_points
-  
 def main():
   #TODO: Make consistent all the way through
   print("Getting bullet holes")
@@ -51,12 +41,16 @@ def main():
   black = np.zeros(idealImg.shape, np.uint8)
   colour = (255, 0, 0)
   thickness = 1
+  ellipses = []
   for radius in mapped_radii:
     ellipse = (centre_i, (radius, radius), 0)
+    ellipses.append(ellipse)
     cv2.ellipse(black, ellipse, colour, thickness, cv2.LINE_8)
   cv2.imshow("Mapped final", black)
   cv2.waitKey(0)
-  
+  with open("mapped_ellipses.txt", "w") as f:
+    for ellipse in ellipses:
+      f.write(str(ellipse) + "\n")
   print("Mapping bullet holes") 
   #Original points
   original_ellipses = get_ellipses(originalPathTxt)
@@ -65,19 +59,44 @@ def main():
   mapped_points = circles_to_points(centre_i, mapped_radii)
   #Bullet points
   bullet_points = ellipses_to_points(bullet_holes, numpoints=20)
-  #Bullet holes plus score rings
-  bullets_plus_rings = bullet_points + original_points
-  #Display
-  visualise_all(original_points, title="Original")
-  visualise_all(mapped_points, title="Mapped") #TODO: mapped too big
-  visualise_all(bullet_points, title="Bullet holes")
-  visualise_all(bullets_plus_rings, title="Bullet holes plus rings")
+  #Display 
+  original_rings = np.zeros(idealImg.shape, np.uint8)
+  mapped_rings = original_rings.copy()
+  original_bullets = original_rings.copy()
+  original_bullets_rings = original_rings.copy()
+  mapped_bullets = original_rings.copy()
+  mapped_bullets_rings = original_rings.copy()
+  
+  original_rings = visualise_points(original_rings, original_points)
+  mapped_rings = visualise_points(mapped_rings, mapped_points)
+  original_bullets = visualise_points(original_bullets, bullet_points)
+  original_bullets_rings = visualise_points(original_rings, bullet_points)
+  
+  cv2.imshow("Original rings", original_rings)
+  cv2.imshow("Mapped rings", mapped_rings)
+  cv2.imshow("Original bullets", original_bullets)
+  cv2.imshow("Original bullets plus rings", original_bullets_rings)
+  cv2.waitKey(0)
   #Transform
-  mapped_bullet_holes = transform(original_points, mapped_points, bullet_points, verbose=True)
-  #Display
-  visualise_all(mapped_bullet_holes, title="Mapped bullet holes")
-  mapped_bullets_plus_rings = mapped_bullet_holes + mapped_points
-  visualise_all(mapped_bullets_plus_rings, title="Mapped bullet holes plus rings")
+  mapped_bullet_points = transform(original_points, mapped_points, bullet_points, verbose=True)
+  mapped_bullets = visualise_points(mapped_bullets, mapped_bullet_points)
+  mapped_bullets_rings = visualise_points(mapped_rings, mapped_bullet_points)
+  cv2.imshow("Mapped bullets", mapped_bullets)
+  
+  center = (350, 350)
+  angle = 270
+  scale = 1.0
+  # Compute the rotation matrix
+  rotation_matrix = cv2.getRotationMatrix2D(center, angle, scale)
 
+# Apply the rotation
+  rotated_image = cv2.warpAffine(mapped_bullets_rings, rotation_matrix, (700, 700))
+  
+  
+  cv2.imshow("Mapped bullets plus rings", rotated_image)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  
+  
 if __name__ == "__main__":
   main()
