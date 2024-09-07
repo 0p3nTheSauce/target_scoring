@@ -70,7 +70,7 @@ def ideal_ellipses(img):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
  
-def ideal_centred_ellipse(x, y, title="Ideal", show=False, img=None, write=False):
+def ideal_centred_ellipses(title="Ideal rings", show=False, verbose=False, x=700, y=700, img=None, write=False):
   if img is None:
     img = np.zeros((x, y), dtype=np.uint8)
   ellipses = []
@@ -90,8 +90,12 @@ def ideal_centred_ellipse(x, y, title="Ideal", show=False, img=None, write=False
   #Third ring onwards
   radius3 = 112
   r = 2
+  if verbose:
+    print("Ideal rings")
   for i in range(9):
     ellipse = (centre, (radius3, radius3), 0)
+    if verbose:
+      print(ellipse)
     ellipses.append(ellipse)
     cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
     r += 1
@@ -99,8 +103,13 @@ def ideal_centred_ellipse(x, y, title="Ideal", show=False, img=None, write=False
     if r == 7:
       #The 4-3 inner ring
       ellipse = (centre, (radius3+36, radius3+36), 0)
+      if verbose:
+        print(ellipse)
       ellipses.append(ellipse)
       cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  if verbose:
+    print('Centre: ', centre)
+    print('Score rings: ', len(ellipses))
   if write:
     cv2.imwrite("ideal_map_ellipse.jpg", img)
   if show:
@@ -163,7 +172,7 @@ def main():
   # with open("ideal_ellipses.txt", "w") as f:
   #   for ellipse in ellipses:
   #     f.write(str(ellipse) + "\n")
-  ellipses, img = ideal_centred_ellipse(700, 700)
+  ellipses, img = ideal_centred_ellipses(show=True, verbose=True)
   for ellipse in ellipses:
     print(ellipse)
 

@@ -3,7 +3,7 @@ import cv2
 #local imports
 from bullet_holes import get_bullet_holes
 from score_lines import get_score_lines
-from ideal_scoreboard import ideal_centred_ellipse
+from ideal_scoreboard import ideal_centred_ellipses
 from map_to_ideal import get_map_to_ideal, fill_in_missing, subtract_rings
 from lines_to_points import ellipses_to_points, circles_to_points, get_ellipses, visualise_points, transform
 
@@ -22,8 +22,9 @@ def main():
 	print()
 	
 	print("Getting ideal score lines")
-	
-	
+	ideal_elps = ideal_centred_ellipses(show=True, verbose=True)
+	print()
+	#TODO: continue here ...
 	quit()  
 	print("Mapping score lines")
 	originalPathTxt = "original_ellipses.txt"

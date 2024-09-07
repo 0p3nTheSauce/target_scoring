@@ -8,7 +8,8 @@ def drawMinEnclose(resized,circles):
 	radius = int(radius)
 	cv2.circle(resized,center,radius-1,(0,255,0),2)
 
-def get_bullet_holes(imgFile, size=(700, 700), title="Contours", show=False, verbose=False):
+def get_bullet_holes(imgFile, size=(500, 500), title="Contours", 
+                     show=False, verbose=False):
 	resized = cv2.resize(imgFile,size)
 	gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 	gray_blur = cv2.GaussianBlur(gray, (9, 9), 0)
@@ -19,6 +20,8 @@ def get_bullet_holes(imgFile, size=(700, 700), title="Contours", show=False, ver
 	contours, hierarchy = cv2.findContours(cont_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 	
 	ellipses = []
+	if verbose:
+		print("Bullet holes")
 	for circles in contours:
 		area = cv2.contourArea(circles)
 		if area < 80 or area > 350:

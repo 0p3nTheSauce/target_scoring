@@ -9,8 +9,8 @@ def drawMinEnclose(resized,circles):
 	cv2.circle(resized,center,radius-1,(0,255,0),2)
 
 def get_score_lines(imgFile, title='Black Score',
-                    show=False, verbose=False,write=False):
-	resized = cv2.resize(imgFile,(500,500))
+                    size=(500, 500), show=False, verbose=False,write=False):
+	resized = cv2.resize(imgFile,size)
 	gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 	gray_blur = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
 	ret, threshscore = cv2.threshold(gray_blur, 120, 255, cv2.THRESH_BINARY)
@@ -43,14 +43,15 @@ def get_score_lines(imgFile, title='Black Score',
 		totcx += cx
 		totcy += cy
 		ellipses.append(ellipse)
+		if verbose:
+			print(ellipse)
 		major_prev = major_axis
 		if show or write:
 			colour = (255,0,0)
 			thickness = 1
 			cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
 			cv2.ellipse(scorecopy, ellipse, colour, thickness, cv2.LINE_8)
-			if verbose:
-				print(ellipse)
+			
 	score_rings = len(ellipses)
 	centre_o = (totcx//score_rings, totcy//score_rings)
 	if verbose:
