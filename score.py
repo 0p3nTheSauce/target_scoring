@@ -91,7 +91,10 @@ def main():
 
 # Apply the rotation
   rotated_image = cv2.warpAffine(mapped_bullets_rings, rotation_matrix, (700, 700))
-  
+  #TODO: Neaten up
+  #TODO: Apply mapped bullets to fully mapped rings (not excluding any rings)
+  #TODO: Start appplying to other images
+  #TODO: Calculate scores 
   
   cv2.imshow("Mapped bullets plus rings", rotated_image)
   cv2.waitKey(0)
