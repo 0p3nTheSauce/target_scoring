@@ -58,13 +58,13 @@ def ellipses_to_points(ellipse_array, numpoints=100):
   ellipse_points = []
   for ellipse in ellipse_array:
     ellipse_points.append(get_ellipse_points(ellipse, numpoints))
-  return np.array(ellipse_points)
+  return ellipse_points
 
 def circles_to_points(centre, radii, numpoints=100):
   circle_points = []
   for radius in radii:
     circle_points.append(get_circle_points(centre, radius, numpoints))
-  return np.array(circle_points)
+  return circle_points
 
 def visualise_points(image, points, point_color):
   for (x, y) in points:
