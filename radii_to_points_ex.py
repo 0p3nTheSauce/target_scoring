@@ -27,7 +27,12 @@ def generate_circle_points(center, radii, num_points=20):
 	
 	return np.array(points, dtype=np.float32)
 
-import numpy as np
+def generate_circle_points2(centre, radius, num_points=20):
+    cx, cy = centre
+    angles = np.linspace(0, 2 * np.pi, num_points, endpoint=False)
+    x = cx + radius * np.cos(angles)
+    y = cy + radius * np.sin(angles)
+    return np.stack((x, y), axis=-1)
 
 def generate_ellipse_points(cx, cy, a, b, theta, num_points=100):
     """
@@ -102,44 +107,8 @@ def visualize_points(points, image_size=(700, 700), point_color=(255, 255, 255))
  
 	return image
 
-def ex():
-  # Example usage:
-  ideal_center = (350, 350)
-  ideal_radii = [688, 616, 544, 508, 472, 400, 328, 256, 184, 112, 42, 22]
 
-  original_center = (259.0, 234.0)
-  original_radii = [411, 387, 329, 270, 212, 153, 95, 22]
 
-  # Generate points for both sets of circles
-  ideal_points = generate_circle_points(ideal_center, ideal_radii)
-  original_points = generate_circle_points(original_center, original_radii)
-
-  # Check the shapes of the generated points
-  print("Ideal Points Shape:", ideal_points.shape)
-  print("Original Points Shape:", original_points.shape)
-  visualize_points(ideal_points)
-  visualize_points(original_points)
-  return ideal_points, original_points
-
-def test():
-	black = np.zeros((700, 700), dtype=np.uint8)
-	for i in range(0, 700, 50):
-		black[i, i] = 255
-	cv2.imshow("Test", black)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
-
-def test2():
-
-	ellipse = ((260.67889404296875, 230.03924560546875), (329.0604248046875, 446.8589172363281), 89.81938171386719)
-	(cx, cy), (a, b), theta = ellipse
-	points = generate_ellipse_points(cx, cy, a, b, theta)
-	black = np.zeros((700, 700, 3), dtype=np.uint8)
-	pnt_img = visualize_points(points, image_size=(500, 500), point_color=(255, 255, 255))
-	cv2.ellipse(black, ellipse, (255, 255, 255), 1)
-	cv2.imshow("Test", black)
-	cv2.imshow("Points", pnt_img)
-	cv2.waitKey(0)
 
 def test3():
 	# Given ellipse parameters
@@ -175,8 +144,19 @@ def test3():
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
+def test4():
+    centre = (250, 250)
+    radius = 200
+    black = np.zeros((500, 500), dtype=np.uint8)
+    cv2.circle(black, centre, radius, 255, 1)
+    cv2.imshow("Circle", black)
+    cv2.waitKey(0)
+    cpnts = generate_circle_points2(centre, radius)
+    cv2.imshow("Points", visualize_points(cpnts,(500, 500)))
+    cv2.waitKey(0)
+
 def main():
-  test3()	
+  test4()	
   
   quit()	
   ideal_points, original_points = ex()

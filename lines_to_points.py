@@ -42,6 +42,9 @@ def get_circle_points(centre, radius, num_points):
 
 def get_ellipse_points(ellipse, num_points):
   ((cx, cy), (major, minor), theta) = ellipse
+  major /= 2 # Convert to semi-major axis length
+  minor /= 2 # Convert to semi-major axis length
+  theta = np.radians(theta)
   t = np.linspace(0, 2 * np.pi, num_points)
   cos_theta = np.cos(theta)
   sin_theta = np.sin(theta)
@@ -85,16 +88,20 @@ def main():
   print()
   
   print("Ideal")
+  ideal_map = np.zeros((700, 700), dtype=np.uint8)
   path = "ideal_ellipses.txt"
   centre, radii = get_circles(path)
   for radius in radii:
     print(centre, radius)
+    cv2.circle(ideal_map, centre, radius, color=255, thickness=1)
   print()
   
   ellipse_points = ellipses_to_points(ellipses)  
   circle_points = circles_to_points(centre, radii)
   visualise_all(ellipse_points, title="Original")
   visualise_all(circle_points, title="Ideal")
+  cv2.imshow("Ideal map", ideal_map)
+  cv2.waitKey(0)
   cv2.destroyAllWindows()
 
 if __name__ == "__main__":
