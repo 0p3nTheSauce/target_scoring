@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import math
 
 def generate_circle_points(center, radii, num_points=20):
 	"""
@@ -29,28 +30,51 @@ def generate_circle_points(center, radii, num_points=20):
 import numpy as np
 
 def generate_ellipse_points(cx, cy, a, b, theta, num_points=100):
-	"""
-	Generate points around the circumference of an ellipse.
+    """
+    Generate points around the circumference of an ellipse.
 
-	Args:
-		cx (float): x-coordinate of the center.
-		cy (float): y-coordinate of the center.
-		a (float): Length of the semi-major axis.
-		b (float): Length of the semi-minor axis.
-		theta (float): Angle of rotation in radians.
-		num_points (int): Number of points to generate along the circumference.
+    Args:
+        cx (float): x-coordinate of the center.
+        cy (float): y-coordinate of the center.
+        a (float): Length of the semi-major axis.
+        b (float): Length of the semi-minor axis.
+        theta (float): Angle of rotation in radians.
+        num_points (int): Number of points to generate along the circumference.
 
-	Returns:
-		numpy.ndarray: Array of (x, y) points along the ellipse.
-	"""
-	t = np.linspace(0, 2 * np.pi, num_points)
-	cos_theta = np.cos(theta)
-	sin_theta = np.sin(theta)
+    Returns:
+        numpy.ndarray: Array of (x, y) points along the ellipse.
+    """
+    t = np.linspace(0, 2 * np.pi, num_points)
+    cos_theta = np.cos(theta)
+    sin_theta = np.sin(theta)
 
-	x = cx + a * np.cos(t) * cos_theta - b * np.sin(t) * sin_theta
-	y = cy + a * np.cos(t) * sin_theta + b * np.sin(t) * cos_theta
+    x = cx + a * np.cos(t) * cos_theta - b * np.sin(t) * sin_theta
+    y = cy + a * np.cos(t) * sin_theta + b * np.sin(t) * cos_theta
 
-	return np.vstack((x, y)).T
+    return np.vstack((x, y)).T
+
+def circpnts():
+	r = 5  #radius
+	n = 20 #points to generate
+	circlePoints = [
+	(r * math.cos(theta), r * math.sin(theta))
+	for theta in (math.pi*2 * i/n for i in range(n))
+	]
+	circlePoints = np.array(circlePoints, dtype=np.uint8)
+	cv2.imshow("Circle Points", circlePoints)
+	cv2.waitKey(0)
+
+def ellpnts():
+	r1 = 5
+	r2 = 10
+	n = 20 #points to generate
+	ellipsePoints = [
+		(r1 * math.cos(theta), r2 * math.sin(theta))
+		for theta in (math.pi*2 * i/n for i in range(n))
+	]
+	ellipsePoints = np.array(ellipsePoints, dtype=np.uint8)
+	cv2.imshow("Ellipse Points", ellipsePoints)
+	cv2.waitKey(0)
 
 
 def visualize_points(points, image_size=(700, 700), point_color=(255, 255, 255)):
@@ -73,8 +97,9 @@ def visualize_points(points, image_size=(700, 700), point_color=(255, 255, 255))
 		# Convert to integer coordinates for OpenCV
 		x, y = int(x), int(y)
 		# Draw a small circle or point at each coordinate
-		cv2.circle(image, (x, y), radius=1, color=point_color, thickness=-1)  # Radius 1 pixel
-
+		#cv2.circle(image, (x, y), radius=1, color=point_color, thickness=-1)  # Radius 1 pixel
+		image[y, x] = point_color
+ 
 	return image
 
 def ex():
@@ -92,6 +117,8 @@ def ex():
   # Check the shapes of the generated points
   print("Ideal Points Shape:", ideal_points.shape)
   print("Original Points Shape:", original_points.shape)
+  visualize_points(ideal_points)
+  visualize_points(original_points)
   return ideal_points, original_points
 
 def test():
@@ -102,8 +129,55 @@ def test():
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
+def test2():
+
+	ellipse = ((260.67889404296875, 230.03924560546875), (329.0604248046875, 446.8589172363281), 89.81938171386719)
+	(cx, cy), (a, b), theta = ellipse
+	points = generate_ellipse_points(cx, cy, a, b, theta)
+	black = np.zeros((700, 700, 3), dtype=np.uint8)
+	pnt_img = visualize_points(points, image_size=(500, 500), point_color=(255, 255, 255))
+	cv2.ellipse(black, ellipse, (255, 255, 255), 1)
+	cv2.imshow("Test", black)
+	cv2.imshow("Points", pnt_img)
+	cv2.waitKey(0)
+
+def test3():
+	# Given ellipse parameters
+	ellipse = ((260.67889404296875, 230.03924560546875), (329.0604248046875, 446.8589172363281), 89.81938171386719)
+
+	# Extract parameters and convert them
+	(cx, cy), (a, b), theta = ellipse
+	a /= 2  # Convert to semi-major axis length
+	b /= 2  # Convert to semi-minor axis length
+	theta = np.radians(theta)  # Convert angle to radians
+
+	# Generate points on the ellipse
+	ellipse_points = generate_ellipse_points(cx, cy, a, b, theta)
+
+	# Create a blank image
+	image_size = (700, 700)
+	image = np.zeros(image_size, dtype=np.uint8)
+
+	# Plot the generated points on the image
+	for x, y in ellipse_points.astype(int):
+		if 0 <= x < image_size[1] and 0 <= y < image_size[0]:
+			image[y, x] = 255  # Mark the point as white
+
+	# Draw the ellipse with OpenCV for comparison
+	cv2_image = np.zeros(image_size, dtype=np.uint8)
+	cv2.ellipse(cv2_image, ellipse, 255, 1)
+
+	# Combine both images for side-by-side comparison
+	combined_image = np.hstack((image, cv2_image))
+
+	# Show the images using OpenCV
+	cv2.imshow('Generated Points vs OpenCV Ellipse', combined_image)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+
 def main():
-  test()	
+  test3()	
+  
   quit()	
   ideal_points, original_points = ex()
   ideal_image = visualize_points(ideal_points)
