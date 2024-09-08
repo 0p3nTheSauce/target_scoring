@@ -8,6 +8,14 @@ def drawMinEnclose(resized,circles):
 	radius = int(radius)
 	cv2.circle(resized,center,radius-1,(0,255,0),2)
 
+def sort_ellipses(ellipses):
+  sorted_ellipses = sorted(
+    ellipses, 
+    key=lambda e: (max(e[1]), min(e[1])), 
+    reverse=True
+	)
+  return sorted_ellipses
+
 def get_score_lines(imgFile, title='Black Score',
                     size=(500, 500), show=False, verbose=False,write=False):
 	resized = cv2.resize(imgFile,size)
@@ -45,8 +53,6 @@ def get_score_lines(imgFile, title='Black Score',
 		totcx += cx
 		totcy += cy
 		ellipses.append(ellipse)
-		if verbose:
-			print(ellipse)
 		major_prev = major_axis
 		#image
 		cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
@@ -54,7 +60,10 @@ def get_score_lines(imgFile, title='Black Score',
 			
 	score_rings = len(ellipses)
 	centre_o = (totcx//score_rings, totcy//score_rings)
+	ellipses = sort_ellipses(ellipses)
 	if verbose:
+		for ellipse in ellipses:
+			print(ellipse)
 		print("Centre: ", centre_o)
 		print("Score Rings: ", score_rings)
 	if show:

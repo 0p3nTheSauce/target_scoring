@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from score_lines import sort_ellipses
 
 def ideal(img):
   # Define the center of the ellipse
@@ -96,8 +97,6 @@ def ideal_centred_ellipses(title="Ideal rings", show=False,
     print("Ideal rings")
   for i in range(9):
     ellipse = (centre, (radius3, radius3), 0)
-    if verbose:
-      print(ellipse)
     ellipses.append(ellipse)
     cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
     r += 1
@@ -109,7 +108,10 @@ def ideal_centred_ellipses(title="Ideal rings", show=False,
         print(ellipse)
       ellipses.append(ellipse)
       cv2.ellipse(img, ellipse, color, thickness, cv2.LINE_8)
+  ellipses = sort_ellipses(ellipses)
   if verbose:
+    for ellipse in ellipses:
+      print(ellipse)
     print('Centre: ', centre)
     print('Score rings: ', len(ellipses))
   if write:
@@ -118,7 +120,6 @@ def ideal_centred_ellipses(title="Ideal rings", show=False,
     cv2.imshow(title, img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-  ellipses.sort()
   return ellipses, centre, img
 
 def missing(img, x, y):
