@@ -20,7 +20,7 @@ def main():
 	score_elps_o, centre_o, _ = get_score_lines(imgFile, title="Score rings",
                                           show=True, verbose=True)
 	print()
-	
+	quit()
 	print("Getting ideal score lines")
 	ideal_elps, centre_i, _ = ideal_centred_ellipses(show=True, verbose=True)
 	print()

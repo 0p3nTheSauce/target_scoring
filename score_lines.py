@@ -72,6 +72,7 @@ def get_score_lines(imgFile, title='Black Score',
 		for ellipse in ellipses:
 			with open("original_ellipses.txt", "a") as f:
 				f.write(str(ellipse) + "\n")
+	ellipses.sort()
 	return ellipses, centre_o, black_score
 
 def main():
