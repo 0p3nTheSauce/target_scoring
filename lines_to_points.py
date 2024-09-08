@@ -2,13 +2,14 @@ import cv2
 import numpy as np
 
 def transform(source_points, destination_points, bullet_holes,
-              verbose=False,centre=(350, 350), rotate=True):
+              verbose=False):
   
   if verbose:
     print("Source Points Shape:", source_points.shape)
     print("Destination Points Shape:", destination_points.shape)
     print("Bullet Holes Shape:", bullet_holes.shape)
     print()
+  #reshape for find homography
   source_points = np.array(source_points, dtype='float32').reshape(-1, 1, 2)
   destination_points = np.array(destination_points, dtype='float32').reshape(-1, 1, 2)
   bullet_holes = np.array(bullet_holes, dtype='float32').reshape(-1, 1, 2)
@@ -26,7 +27,11 @@ def transform(source_points, destination_points, bullet_holes,
     print(H)
     print()
   
-  return transformed_points.reshape(-1, 2)
+  
+  #Return to original shape
+  transformed_points = transformed_points.reshape(-1, 2)
+
+  return transformed_points
 
 def get_ellipses(path):
   ellipses = []
@@ -106,12 +111,18 @@ def circles_to_ellipses(centre, radii):
     ellipses.append(ellipse)
   return ellipses
 
-def visualise_points(points, title="Points", show=False, shape=(700,700), image=None, point_color=255):
+def visualise_points(points, title="Points", show=False, shape=(700,700),
+                     image=None, point_color=255, rotate_angle=0):
   if image is None:
     image = np.zeros(shape, dtype=np.uint8)
   for (x, y) in points:
     x, y = int(x), int(y)
     cv2.circle(image, (x, y), radius=1, color=point_color, thickness=-1)
+  if rotate_angle != 0:
+    center = (shape[0] // 2, shape[1] // 2)
+    scale = 1.0
+    rotation_matrix = cv2.getRotationMatrix2D(center, rotate_angle, scale)
+    image = cv2.warpAffine(image, rotation_matrix, shape)
   if show:
     cv2.imshow(title, image)
     cv2.waitKey(0)

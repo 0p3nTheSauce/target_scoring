@@ -49,6 +49,8 @@ def main():
 	#Convert ellipses to points
 	#Original points
 	score_elps_o_pnts = ellipses_to_points(score_elps_o)
+	#Ideal points
+	ideal_elps_pnts = ellipses_to_points(ideal_elps)
 	#Mapped points
 	score_elps_m = circles_to_ellipses(centre_m, mapped_radii)
 	score_elps_m_pnts = ellipses_to_points(score_elps_m)
@@ -57,19 +59,26 @@ def main():
 	#Bullet points plus score rings
 	blt_scr_o_pnts = np.vstack((bullet_elps_o_pnts, score_elps_o_pnts))
 	#Display	
-	visualise_points(score_elps_o_pnts, title="Original score rings", show=True)
-	visualise_points(score_elps_m_pnts, title="Mapped score rings", show=True)
-	visualise_points(bullet_elps_o_pnts, title="Original bullet holes", show=True)
-	visualise_points(blt_scr_o_pnts, title="Original score rings plus bullet holes", show=True)
+	visualise_points(score_elps_o_pnts,
+                  title="Original score rings", show=True)
+	visualise_points(score_elps_m_pnts,
+                  title="Mapped score rings", show=True)
+	visualise_points(bullet_elps_o_pnts,
+                  title="Original bullet holes", show=True)
+	visualise_points(blt_scr_o_pnts,
+                  title="Original score rings plus bullet holes", show=True)
+	visualise_points(ideal_elps_pnts,
+									title="Ideal score rings", show=True)
 	
  #Transform
 	bullet_elps_m_pnts = transform(score_elps_o_pnts, score_elps_m_pnts, bullet_elps_o_pnts, verbose=True)
-	blt_scr_m_pnts = np.vstack((bullet_elps_m_pnts, score_elps_m_pnts))
-	visualise_points(bullet_elps_m_pnts, title="Mapped bullet holes", show=True)
-	visualise_points(blt_scr_m_pnts, title="Mapped score rings plus bullet holes", show=True)
-	#TODO:the mapped score rings have the first ring, which shouldn't be there
+	blt_scr_i_pnts = np.vstack((ideal_elps_pnts, bullet_elps_m_pnts))
+	visualise_points(bullet_elps_m_pnts,
+                  title="Mapped bullet holes", show=True)
+	visualise_points(blt_scr_i_pnts,
+                  title="Mapped bullet holes plus ideal score rings",
+                  show=True, rotate_angle=270)
 	#TODO: The mapped bullet holes should be added to mapped and filled rings
-	#TODO: Rotate the mapped bullet holes and rings
 	#TODO: Calculate scores
  
 	quit()
