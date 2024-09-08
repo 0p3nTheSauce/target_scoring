@@ -50,6 +50,13 @@ def get_bullet_holes(imgFile, size=(500, 500), title="Contours",
 		cv2.destroyAllWindows()
 	return ellipses
 	
+	# # Divide the original image by the illumination pattern
+	# illumination_corrected = cv2.divide(gray, blur, scale=255)
+
+	# # Apply global or adaptive thresholding
+	# _, corrected_thresh = cv2.threshold(illumination_corrected, 127, 255, cv2.THRESH_BINARY) 
+
+
 def main():
 	# if len(sys.argv) == 2:
 	# 	imgPath = sys.argv[1]
