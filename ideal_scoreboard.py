@@ -46,7 +46,55 @@ def ideal_centred(img, x, y):
     if r == 7:
       cv2.circle(img, centre, radius3+18, color, thickness, cv2.LINE_8)
   cv2.imwrite("ideal_map_circle.jpg", img)
- 
+
+def ideal_centred_circles(title="Ideal rings", show=False,
+                         verbose=False, x=700, y=700, img=None,
+                         write=False):
+  if img is None:
+    img = np.zeros((x, y), dtype=np.uint8)
+  radii = []
+  centre = (round(x/2), round(y/2))
+  color = 255 #White
+  thickness = 1
+  #First ring
+  radius1 = 10
+  radii.append(radius1)
+  cv2.circle(img, centre, radius1, color, thickness, cv2.LINE_8)
+  #Second ring
+  radius2 = 22
+  radii.append(radius2)
+  cv2.circle(img, centre, radius2, color, thickness, cv2.LINE_8)
+  #Third ring onwards
+  radius3 = 56
+  r = 2
+  for i in range(9):
+    cv2.circle(img, centre, radius3, color, thickness, cv2.LINE_8)
+    radii.append(radius3)
+    r += 1
+    radius3 += 36
+    if r == 7:
+      cv2.circle(img, centre, radius3+18, color, thickness, cv2.LINE_8)
+      radii.append(radius3+18)
+      r += 1
+      radius3 += 36
+      if r == 7:
+        cv2.circle(img, centre, radius3+18, color, thickness, cv2.LINE_8)
+        radii.append(radius3+18)
+  radii.sort()
+  if verbose:
+    print("Ideal rings")
+    for radius in radii:
+      print(radius)
+    print('Centre: ', centre)
+    print('Score rings: ', len(radii))
+  if write:
+    cv2.imwrite("ideal_map_circle.jpg", img)
+  if show:
+    cv2.imshow(title, img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+  return radii, centre, img
+
 def ideal_ellipses(img):
   center = (247, 254)
   color = (0, 255, 0)  # Green
