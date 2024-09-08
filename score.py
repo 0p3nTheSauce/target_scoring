@@ -45,7 +45,7 @@ def main():
 	displayVars = (shape, centre_i)
 	mapped_radii = subtract_rings(map_fill_radii, missing_rings, displayVars)
 	
-	#Transofrm
+	#Convert ellipses to points
 	#Original points
 	score_elps_o_pnts = ellipses_to_points(score_elps_o)
 	#Mapped points
@@ -61,6 +61,16 @@ def main():
 	visualise_points(bullet_elps_o_pnts, title="Original bullet holes", show=True)
 	visualise_points(blt_scr_o_pnts, title="Original score rings plus bullet holes", show=True)
 	
+ #Transform
+	bullet_elps_m_pnts = transform(score_elps_o_pnts, score_elps_m_pnts, bullet_elps_o_pnts, verbose=True)
+	blt_scr_m_pnts = np.vstack((bullet_elps_m_pnts, score_elps_m_pnts))
+	visualise_points(bullet_elps_m_pnts, title="Mapped bullet holes", show=True)
+	visualise_points(blt_scr_m_pnts, title="Mapped score rings plus bullet holes", show=True)
+	#TODO:the mapped score rings have the first ring, which shouldn't be there
+	#TODO: The mapped bullet holes should be added to mapped and filled rings
+	#TODO: Rotate the mapped bullet holes and rings
+	#TODO: Calculate scores
+ 
 	quit()
 	#Premapping 
 	ideal_attributes, premapped_attributes = get_map_to_ideal(

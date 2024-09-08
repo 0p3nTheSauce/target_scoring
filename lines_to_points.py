@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 
-def transform(source_points, destination_points, bullet_holes, verbose=False):
+def transform(source_points, destination_points, bullet_holes,
+              verbose=False,centre=(350, 350), rotate=True):
   
   if verbose:
     print("Source Points Shape:", source_points.shape)
@@ -24,7 +25,7 @@ def transform(source_points, destination_points, bullet_holes, verbose=False):
     print("Homography matrix:")
     print(H)
     print()
-      
+  
   return transformed_points.reshape(-1, 2)
 
 def get_ellipses(path):
