@@ -15,17 +15,31 @@ def seperate_points(points, num_points):
 	split_points = np.split(points, n)
 	return split_points
 
+# def inside_ring(points, centre, radius):
+# 	cx, cy = centre
+# 	threshold = 20
+# 	# Calculate the distance of each point from the center (cx, cy)
+# 	distances = np.sqrt((points[:, 0] - cx) ** 2 + (points[:, 1] - cy) ** 2)
+# 	# Check how many points are inside the circle
+# 	points_inside_circle = np.sum(distances <= radius)
+# 	print("Points inside circle:", points_inside_circle)
+# 	#Check if at least threshold points are inside the circle
+# 	return points_inside_circle >= threshold
+
 def inside_ring(points, centre, radius):
 	cx, cy = centre
 	threshold = 20
+	inside = []
+	points_inside_circle = 0
 	# Calculate the distance of each point from the center (cx, cy)
-	distances = np.sqrt((points[:, 0] - cx) ** 2 + (points[:, 1] - cy) ** 2)
-	# Check how many points are inside the circle
-	points_inside_circle = np.sum(distances <= radius)
+	for point in points:
+		x, y = point
+		distance = math.sqrt((x - cx) ** 2 + (y - cy) ** 2)
+		if distance <= radius:
+			points_inside_circle += 1
+			inside.append(point)
 	print("Points inside circle:", points_inside_circle)
-	#Check if at least threshold points are inside the circle
-	return points_inside_circle >= threshold
-
+	return inside, points_inside_circle >= threshold
 
 # def score_single(bullet_pnts, ideal_radii, centre_i):
 # 	ideal_radii.reverse() 
@@ -37,45 +51,69 @@ def inside_ring(points, centre, radius):
 # 	return 0
 
 def score_single(bullet_pnts, ideal_radii, centre_i):
-	ideal_radii.reverse()
-	if inside_ring(bullet_pnts, centre_i, ideal_radii[0]):
-		return 11
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[1]):
-		return 10
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[2]):
-		return 9
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[3]):
-		return 8
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[4]):
-		return 7
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[5]):
-		return 6
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[6]):
-		return 5
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[7]):
-		return 4
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[8]):
-		return 3
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[9]):
-		return 2
-	elif inside_ring(bullet_pnts, centre_i, ideal_radii[10]):
-		return 1
-	else:
-		return 0
+	score = 11
+	for radii in ideal_radii:
+		inside, points_inside_circle = inside_ring(bullet_pnts, centre_i, radii)
+		if points_inside_circle:
+			return score, inside
+		score -= 1
+	return 0
+# def score_single(bullet_pnts, ideal_radii, centre_i):
+# 	ideal_radii.reverse()
+# 	if inside_ring(bullet_pnts, centre_i, ideal_radii[0]):
+# 		return 11
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[1]):
+# 		return 10
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[2]):
+# 		return 9
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[3]):
+# 		return 8
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[4]):
+# 		return 7
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[5]):
+# 		return 6
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[6]):
+# 		return 5
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[7]):
+# 		return 4
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[8]):
+# 		return 3
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[9]):
+# 		return 2
+# 	elif inside_ring(bullet_pnts, centre_i, ideal_radii[10]):
+# 		return 1
+# 	else:
+# 		return 0
 
+# def score(bullet_pnts, num_points=100):
+# 	scores = []
+# 	total = 0
+# 	split_points = seperate_points(bullet_pnts, num_points)
+# 	print(len(split_points))
+# 	ideal_radii, centre_i, _ = ideal_centred_circles(include_inner=False)
+# 	for blt_pnts in split_points:
+# 		score = score_single(blt_pnts, ideal_radii, centre_i)
+# 		scores.append(score)
+# 		total += score
+# 	print("Scores:", scores)
+# 	print("Total:", total)
+	
 def score(bullet_pnts, num_points=100):
 	scores = []
+	points_inside = np.empty((0, 2))
 	total = 0
 	split_points = seperate_points(bullet_pnts, num_points)
 	print(len(split_points))
 	ideal_radii, centre_i, _ = ideal_centred_circles(include_inner=False)
 	for blt_pnts in split_points:
-		score = score_single(blt_pnts, ideal_radii, centre_i)
+		score, inside = score_single(blt_pnts, ideal_radii, centre_i)
 		scores.append(score)
+		points_inside = np.vstack((points_inside, np.array((inside))))
 		total += score
 	print("Scores:", scores)
 	print("Total:", total)
-	
+	return points_inside
+ 
 
 def main():
 	#TODO: Make consistent all the way through
@@ -156,7 +194,10 @@ def main():
 	visualise_points(bullet_elps_m_pnts,
 									title="Mapped bullet holes plus ideal score rings",
 									show=True, image=idealImg, rotate_angle=270)	
-	score(bullet_elps_m_pnts, num_points=20)
+	
+ 
+	points_inside = score(bullet_elps_m_pnts, num_points=20)
+	visualise_points(points_inside, title="Points inside", show=True, image=idealImg)
  #TODO: Calculate scores
  
 	
