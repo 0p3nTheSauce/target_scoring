@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 from collections import Counter
 import sys
+#Local imports
+from ideal_scoreboard import ideal_centred_ellipses
+from score_lines import get_score_lines
+
 
 def normalise_diffs(diffs_rings):
   #There should be max 4 different differences between the radii
@@ -588,13 +592,24 @@ def get_map_to_ideal2(original_elps, centre_o, ideal_elps, centre_i,
   
 
 
-def subtract_rings(radii, missing):
+def subtract_rings(radii, missing ,displayVars=None):
   #We want to have the original rings, just mapped to their correct positions
   mapped = []
   for index, bool in enumerate(missing):
     if bool:
       continue
     mapped.append(radii[index])
+  if displayVars is not None:
+    shape, centre_i = displayVars 
+    black = np.zeros(shape, np.uint8)
+    colour = (255, 0, 0)
+    thickness = 1
+    for radius in mapped:
+      ellipse = (centre_i, (radius, radius), 0)
+      cv2.ellipse(black, ellipse, colour, thickness, cv2.LINE_8)
+    cv2.imshow("Mapped final", black)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
   return mapped
 
 def main():
@@ -606,14 +621,31 @@ def main():
   #   originalPath = input("Enter the original image file: ")
   #   idealPathImg = input("Enter the ideal image file: ")
   #   idealPathTxt = input("Enter the ideal text file: ")
-  originalPathImg = "black_score.jpg"
-  idealPathImg = "ideal_map_ellipse.jpg"
-  originalPathTxt = "original_ellipses.txt"
-  idealPathTxt = "ideal_ellipses.txt"
+  originalPathImg = "TargetPhotos/20141018_155743.jpg"
+  originalImg = cv2.imread(originalPathImg, cv2.IMREAD_UNCHANGED)
   
-  originalImg = cv2.imread(originalPathImg, cv2.IMREAD_GRAYSCALE)
-  idealImg = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
+  score_elps_o, centre_o, scoreImg = get_score_lines(originalImg)
+  ideal_elps_i, centre_i, idealImg = ideal_centred_ellipses()
+  #Map
+  ideal_attributes, mapped_attributes = get_map_to_ideal2(
+    score_elps_o, centre_o, ideal_elps_i, centre_i, scoreImg, idealImg,
+    verbose=True)
+  radii_i, diffs_rings_i, centre_i = ideal_attributes
+  radii_m, diffs_rings_m, centre_m = mapped_attributes #these are partially mapped
+  #Still not in the exact proportions
   
+  #Fill in
+  showOriginal = False
+  displayVars = (originalImg, idealImg.shape, centre_i, showOriginal)
+  map_fill_radii, map_fill_diffs, missing_rings = fill_in_missing(
+    radii_i, radii_m, diffs_rings_m, displayVars)
+  if map_fill_radii is not None:
+    print("Rings filled successfully")
+    
+  #finish the mapping
+  displayVars = (idealImg.shape, centre_i)
+  mapped_radii = subtract_rings(map_fill_radii, missing_rings, displayVars)
+  quit()
   #Map
   ideal_attributes, mapped_attributes = get_map_to_ideal(
     originalPathTxt, idealPathTxt, originalImg, idealImg, verbose=True)

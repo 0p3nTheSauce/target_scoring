@@ -70,7 +70,9 @@ def ideal_ellipses(img):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
  
-def ideal_centred_ellipses(title="Ideal rings", show=False, verbose=False, x=700, y=700, img=None, write=False):
+def ideal_centred_ellipses(title="Ideal rings", show=False,
+                           verbose=False, x=700, y=700, img=None,
+                           write=False):
   if img is None:
     img = np.zeros((x, y), dtype=np.uint8)
   ellipses = []

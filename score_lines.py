@@ -17,10 +17,12 @@ def get_score_lines(imgFile, title='Black Score',
 	cont_score = threshscore.copy()
 	contours_score, hierarchy_score = cv2.findContours(cont_score, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 	
- 	#Attributes
-	if show or write:
-		black_score = np.zeros(gray.shape) 
-		scorecopy = resized.copy()
+  #image
+	black_score = np.zeros(gray.shape) 
+	scorecopy = resized.copy()
+	colour = (255,0,0)
+	thickness = 1
+  #Attributes
 	thresh = 2
 	major_prev = 0
 	ellipses = []
@@ -46,11 +48,9 @@ def get_score_lines(imgFile, title='Black Score',
 		if verbose:
 			print(ellipse)
 		major_prev = major_axis
-		if show or write:
-			colour = (255,0,0)
-			thickness = 1
-			cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
-			cv2.ellipse(scorecopy, ellipse, colour, thickness, cv2.LINE_8)
+		#image
+		cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
+		cv2.ellipse(scorecopy, ellipse, colour, thickness, cv2.LINE_8)
 			
 	score_rings = len(ellipses)
 	centre_o = (totcx//score_rings, totcy//score_rings)
@@ -72,7 +72,7 @@ def get_score_lines(imgFile, title='Black Score',
 		for ellipse in ellipses:
 			with open("original_ellipses.txt", "a") as f:
 				f.write(str(ellipse) + "\n")
-	return ellipses, centre_o
+	return ellipses, centre_o, black_score
 
 def main():
 	# if len(sys.argv) == 2:
@@ -80,7 +80,9 @@ def main():
 	# else:
 	#   imgPath = input("Enter the image file: ")
 	imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
-	score_lines, centre_o = get_score_lines(imgFile, show=True, verbose=True, write=False)
+	score_lines, centre_o, black_score = get_score_lines(imgFile,
+                                                      show=True, verbose=True,
+                                                      write=False)
 	
 
 if __name__ == '__main__':
