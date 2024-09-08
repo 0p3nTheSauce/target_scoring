@@ -5,7 +5,7 @@ from bullet_holes import get_bullet_holes
 from score_lines import get_score_lines
 from ideal_scoreboard import ideal_centred_ellipses
 from map_to_ideal import get_map_to_ideal, fill_in_missing, subtract_rings
-from lines_to_points import ellipses_to_points, circles_to_points, get_ellipses, visualise_points, transform
+from lines_to_points import ellipses_to_points, circles_to_ellipses, visualise_points, transform
 
 def main():
 	#TODO: Make consistent all the way through
@@ -44,6 +44,33 @@ def main():
 	#Finish the mapping 
 	displayVars = (shape, centre_i)
 	mapped_radii = subtract_rings(map_fill_radii, missing_rings, displayVars)
+	
+	#Transofrm
+	#Original points
+	score_elps_o_pnts = ellipses_to_points(score_elps_o)
+	#Mapped points
+	score_elps_m = circles_to_ellipses(centre_m, mapped_radii)
+	score_elps_m_pnts = ellipses_to_points(score_elps_m)
+	#Bullet points
+	bullet_elps_o_pnts = ellipses_to_points(bullet_elps_o)
+	#Display
+	score_elps_o_img = np.zeros(shape, np.uint8)
+	score_elps_m_img = np.zeros(shape, np.uint8)
+	bullet_elps_o_img = np.zeros(shape, np.uint8)
+	scr_blt_o_img = np.zeros(shape, np.uint8) #bullets plus score rings
+	
+	score_elps_o_img = visualise_points(score_elps_o_img, score_elps_o_pnts)
+	score_elps_m_img = visualise_points(score_elps_m_img, score_elps_m_pnts)
+	bullet_elps_o_img = visualise_points(bullet_elps_o_img, bullet_elps_o_pnts)
+	scr_blt_o_img = visualise_points(score_elps_o_img, bullet_elps_o_pnts)
+	
+	cv2.imshow("Original score rings", score_elps_o_img)
+	cv2.imshow("Mapped score rings", score_elps_m_img)
+	cv2.imshow("Original bullet holes", bullet_elps_o_img)
+	cv2.imshow("Original score rings plus bullet holes", scr_blt_o_img)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+	
 	quit()
 	#Premapping 
 	ideal_attributes, premapped_attributes = get_map_to_ideal(

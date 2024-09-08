@@ -98,6 +98,12 @@ def circles_to_points(centre, radii, numpoints=100):
 
     return circle_points
 
+def circles_to_ellipses(centre, radii):
+  ellipses = []
+  for radius in radii:
+    ellipse = (centre, (radius, radius), 0)
+    ellipses.append(ellipse)
+  return ellipses
 
 def visualise_points(points, title="Points", show=False, shape=(700,700), image=None, point_color=255):
   if image is None:
@@ -113,7 +119,7 @@ def visualise_points(points, title="Points", show=False, shape=(700,700), image=
 
 def main():
   print("Original")
-  path = "original_ellipses.txt"
+  path = "experimentation/ellipses/original_ellipses.txt"
   ellipses = get_ellipses(path)
   for ellipse in ellipses:
     print(ellipse)
@@ -122,7 +128,7 @@ def main():
   print("Ideal")
   ideal_map = np.zeros((700, 700), dtype=np.uint8)
   # path = "ideal_ellipses.txt"
-  path = "mapped_ellipses.txt"
+  path = "experimentation/ellipses/mapped_ellipses.txt"
   centre, radii = get_circles(path)
   for radius in radii:
     print(centre, radius)
