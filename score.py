@@ -24,7 +24,6 @@ def main():
 	print("Getting ideal score lines")
 	ideal_elps, centre_i, _ = ideal_centred_ellipses(show=True, verbose=True)
 	print()
-	quit()
 
 	print("Mapping score lines")
 	#Premapping
@@ -32,6 +31,8 @@ def main():
 		score_elps_o, centre_o, ideal_elps, centre_i, show=True, verbose=True)
 	radii_i, diffs_rings_i, centre_i = ideal_attributes
 	radii_m, diffs_rings_m, centre_m = premapped_attributes
+	# print()
+	print("Filling in missing rings")
   #Fill in 
 	showOriginal = None
 	shape = (700, 700)

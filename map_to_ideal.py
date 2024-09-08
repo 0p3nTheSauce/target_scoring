@@ -11,7 +11,10 @@ def normalise_diffs(diffs_rings):
   #There should be max 4 different differences between the radii
   thresh = 4
   made_change = False
-  for i in range(len(diffs_rings)-1):
+  #the difference between the 2nd and 3rd ring tends to be 
+  #very similar to the most common difference, which can lead to
+  #uncontrolled recursion, hence len(diff_rings) - 3
+  for i in range(len(diffs_rings)-3): 
     frst = diffs_rings[i]
     scnd = diffs_rings[i+1]
     diff = abs(frst - scnd)
@@ -381,6 +384,8 @@ def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i,
   radii_i = []
   diffs_rings_i = [] #capture the differences between the radii
   score_rings_i = 0
+  if verbose:
+    print("Ideal Rings")
   for ellipse in ideal_elps:
     if verbose:
       print(ellipse)
