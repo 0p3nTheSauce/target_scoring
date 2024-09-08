@@ -404,7 +404,7 @@ def get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg=None, idealImg=N
     print()
   
   ##########################################Original##########################################
-  #Attributess 
+  #Attributes
   totcx_o = 0
   totcy_o = 0
   score_rings_o = 0
@@ -482,6 +482,111 @@ def get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg=None, idealImg=N
   mapped_attributes = (radii_o, diffs_rings_m, centre_i)
   
   return ideal_attributes, mapped_attributes
+
+def get_map_to_ideal2(original_elps, centre_o, ideal_elps, centre_i, 
+                      originalImg=None, idealImg=None, verbose=False):
+  show = True
+  show_original = True
+  if idealImg is None:
+    show = False
+  if originalImg is None:
+    show_original = False
+  if verbose:
+    print("Mapping")
+    print()
+  
+  ##########################################Ideal##########################################
+  #Attributes
+  radii_i = []
+  diffs_rings_i = [] #capture the differences between the radii
+  score_rings_i = 0
+  for ellipse in ideal_elps:
+    if verbose:
+      print(ellipse)
+    ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+    radius = round((major_axis + minor_axis)/2)
+    radii_i.append(radius)
+  score_rings_i = len(radii_i)
+  #Calculate the differences between the radii
+  diffs_rings_i = calculate_diffs(radii_i, normalise=False)
+  #Print the res
+  if verbose:
+    print("Ideal Centre: ", centre_i)
+    print("Ideal Radii: ", radii_i)
+    print("Distance between Rings: ", diffs_rings_i)
+    print("Score Rings: ", score_rings_i)
+    print()
+
+  ##########################################Original##########################################
+  #Attributes
+  radii_o = []
+  diffs_rings_o = []
+  score_rings_o = 0
+  if verbose:
+    print("Original Rings")
+  for ellipse in original_elps:
+    if verbose:
+      print(ellipse)
+    ((cx, cy), (major_axis, minor_axis), angle) = ellipse
+    radius = round((major_axis + minor_axis)/2)
+    radii_o.append(radius)
+  score_rings_o = len(radii_o)
+  #Calculate the differences between the radii
+  diffs_rings_o = calculate_diffs(radii_o, normalise=False)
+  if verbose:
+    print("Original Centre: ", centre_o)
+    print("Original Radii: ", radii_o)
+    print("Distance between Rings: ", diffs_rings_o)
+    print("Score Rings: ", score_rings_o)
+    print()
+  
+  ##########################################Mapped##########################################
+  #Attributes
+  mapped_ellipses = []
+  diffs_rings_m = [] #capture the differences between the radii
+  if show:
+    mapped = np.zeros(idealImg.shape, np.uint8)
+    colour = (255, 0, 0)
+    thickness = 1
+  
+  if verbose:
+    print("Mapped Rings")
+  for radius in radii_o:
+    ellipse = (centre_i, (radius, radius), 0)
+    if verbose:
+      print(ellipse)
+    if show:
+      cv2.ellipse(mapped, ellipse, colour, thickness, cv2.LINE_8)
+    mapped_ellipses.append(ellipse)
+  
+  #Calculate diffs
+  diffs_rings_m = calculate_diffs(radii_o)
+  
+  #Print the res
+  if verbose:
+    print("Premapped Centre: ", centre_i)
+    print("Premapped Radii: ", radii_o)
+    print("Distance between Rings: ", diffs_rings_m)
+    print("Score Rings: ", score_rings_o)
+    print()
+  
+  ##########################################Display##########################################
+  if show_original:
+    cv2.imshow("Original", originalImg)
+    cv2.waitKey(0)
+  if show:
+    cv2.imshow("Ideal", idealImg)
+    cv2.imshow("Premapped", mapped)
+    cv2.waitKey(0)
+  if show or show_original:
+    cv2.destroyAllWindows()
+  
+  ideal_attributes = (radii_i, diffs_rings_i, centre_i)
+  mapped_attributes = (radii_o, diffs_rings_m, centre_i)
+  return ideal_attributes, mapped_attributes
+  
+  
+
 
 def subtract_rings(radii, missing):
   #We want to have the original rings, just mapped to their correct positions
