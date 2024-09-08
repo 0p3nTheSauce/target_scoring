@@ -49,7 +49,7 @@ def ideal_centred(img, x, y):
 
 def ideal_centred_circles(title="Ideal rings", show=False,
                          verbose=False, x=700, y=700, img=None,
-                         write=False):
+                         write=False, include_inner=True):
   if img is None:
     img = np.zeros((x, y), dtype=np.uint8)
   radii = []
@@ -72,14 +72,9 @@ def ideal_centred_circles(title="Ideal rings", show=False,
     radii.append(radius3)
     r += 1
     radius3 += 36
-    if r == 7:
+    if r == 7 and include_inner:
       cv2.circle(img, centre, radius3+18, color, thickness, cv2.LINE_8)
       radii.append(radius3+18)
-      r += 1
-      radius3 += 36
-      if r == 7:
-        cv2.circle(img, centre, radius3+18, color, thickness, cv2.LINE_8)
-        radii.append(radius3+18)
   radii.sort()
   if verbose:
     print("Ideal rings")
