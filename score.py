@@ -17,7 +17,7 @@ def main():
 	print()
 
 	print("Getting score lines")
-	score_elps_o, centre_o = get_score_lines(imgFile, title="Score rings",
+	score_elps_o, centre_o, _ = get_score_lines(imgFile, title="Score rings",
                                           show=True, verbose=True)
 	print()
 	
