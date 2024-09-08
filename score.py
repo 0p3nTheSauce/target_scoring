@@ -27,6 +27,23 @@ def main():
 	#TODO: continue here ...
 	
 	print("Mapping score lines")
+	#Premapping
+	ideal_attributes, premapped_attributes = get_map_to_ideal(
+		score_elps_o, centre_o, ideal_elps, centre_i, show=True, verbose=True)
+	radii_i, diffs_rings_i, centre_i = ideal_attributes
+	radii_m, diffs_rings_m, centre_m = premapped_attributes
+  #Fill in 
+	showOriginal = None
+	shape = (700, 700)
+	displayVars = (showOriginal, shape, centre_i)
+	map_fill_radii, map_fill_diffs, missing_rings = fill_in_missing(
+		radii_i, radii_m, diffs_rings_m, displayVars)
+	if map_fill_radii is None:
+		print("No mapping possible")
+		return
+	#Finish the mapping 
+	displayVars = (shape, centre_i)
+	mapped_radii = subtract_rings(map_fill_radii, missing_rings, displayVars)
 	quit()
 	#Premapping 
 	ideal_attributes, premapped_attributes = get_map_to_ideal(

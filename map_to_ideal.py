@@ -110,7 +110,8 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   return radii, diffs, missing_rings
 
   
-def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=None):
+def fill_in_missing(ideal_radii, original_radii, original_diffs,
+                    displayVars=None):
   #TODO: Try with multiple missing rings
   #TODO: Maybe mess around with filling from only 3 or 4 rings
   #TODO: Given the ad hoc mapping, it may be more efficient to simply work out the most common difference
@@ -337,7 +338,11 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
     mapped_diffs[-1] = ideal_first_diff
   
   if displayVars is not None:
-    originalImg, shape, centre_i, showOriginal = displayVars
+    originalImg, shape, centre_i = displayVars
+    if originalImg is None:
+      showOriginal = False
+    else:
+      showOriginal = True
     print("Filling in missing rings")
     print()
     print("Missing rings: ", missing_rings)
@@ -359,11 +364,12 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs, displayVars=Non
   return mapped_radii, mapped_diffs, missing_rings
 
 def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i, 
-                      originalImg=None, idealImg=None, verbose=False):
-  show = True
+                      originalImg=None, idealImg=None,show=False,
+                      verbose=False, shape=(700, 700)):
+  show_ideal = True
   show_original = True
   if idealImg is None:
-    show = False
+    show_ideal = False
   if originalImg is None:
     show_original = False
   if verbose:
@@ -420,7 +426,7 @@ def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i,
   mapped_ellipses = []
   diffs_rings_m = [] #capture the differences between the radii
   if show:
-    mapped = np.zeros(idealImg.shape, np.uint8)
+    mapped = np.zeros(shape, np.uint8)
     colour = (255, 0, 0)
     thickness = 1
   
@@ -449,11 +455,13 @@ def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i,
   if show_original:
     cv2.imshow("Original", originalImg)
     cv2.waitKey(0)
-  if show:
+  if show_ideal:
     cv2.imshow("Ideal", idealImg)
+    cv2.waitKey(0)
+  if show:
     cv2.imshow("Premapped", mapped)
     cv2.waitKey(0)
-  if show or show_original:
+  if show or show_original or show_ideal:
     cv2.destroyAllWindows()
   
   ideal_attributes = (radii_i, diffs_rings_i, centre_i)
@@ -500,14 +508,13 @@ def main():
   #Map
   ideal_attributes, mapped_attributes = get_map_to_ideal(
     score_elps_o, centre_o, ideal_elps_i, centre_i, scoreImg, idealImg,
-    verbose=True)
+    show=True, verbose=True)
   radii_i, diffs_rings_i, centre_i = ideal_attributes
   radii_m, diffs_rings_m, centre_m = mapped_attributes #these are partially mapped
   #Still not in the exact proportions
   
   #Fill in
-  showOriginal = False
-  displayVars = (originalImg, idealImg.shape, centre_i, showOriginal)
+  displayVars = (originalImg, idealImg.shape, centre_i)
   map_fill_radii, map_fill_diffs, missing_rings = fill_in_missing(
     radii_i, radii_m, diffs_rings_m, displayVars)
   if map_fill_radii is not None:
@@ -516,33 +523,7 @@ def main():
   #finish the mapping
   displayVars = (idealImg.shape, centre_i)
   mapped_radii = subtract_rings(map_fill_radii, missing_rings, displayVars)
-  quit()
-  #Map
-  ideal_attributes, mapped_attributes = get_map_to_ideal(
-    originalPathTxt, idealPathTxt, originalImg, idealImg, verbose=True)
-  radii_i, diffs_rings_i, centre_i = ideal_attributes
-  radii_m, diffs_rings_m, centre_i = mapped_attributes #these are partially mapped
-  #Still not in the exact proportions
-  
-  #Fill in
-  showOriginal = False
-  displayVars = (originalImg, idealImg.shape, centre_i, showOriginal)
-  map_fill_radii, map_fill_diffs, missing_rings = fill_in_missing(
-    radii_i, radii_m, diffs_rings_m, displayVars)
-  
-  if map_fill_radii is not None:
-    print("Rings filled successfully")
-  
-  #finish the mapping
-  mapped_radii = subtract_rings(map_fill_radii, missing_rings)
-  black = np.zeros(idealImg.shape, np.uint8)
-  colour = (255, 0, 0)
-  thickness = 1
-  for radius in mapped_radii:
-    ellipse = (centre_i, (radius, radius), 0)
-    cv2.ellipse(black, ellipse, colour, thickness, cv2.LINE_8)
-  cv2.imshow("Mapped final", black)
-  cv2.waitKey(0)
+
   
   
   
