@@ -364,7 +364,7 @@ def get_map_to_ideal(originalPathTxt, idealPathTxt, originalImg=None, idealImg=N
   if verbose:
     print("Mapping")
     print()
-  #contours_o, _ = cv2.findContours(thresh_o, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+  
   
   ##########################################Ideal##########################################
   #Attributes

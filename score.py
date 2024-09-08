@@ -22,17 +22,12 @@ def main():
 	print()
 	
 	print("Getting ideal score lines")
-	ideal_elps = ideal_centred_ellipses(show=True, verbose=True)
+	ideal_elps, centre_i, _ = ideal_centred_ellipses(show=True, verbose=True)
 	print()
 	#TODO: continue here ...
-	quit()  
+	
 	print("Mapping score lines")
-	originalPathTxt = "original_ellipses.txt"
-	idealPathTxt = "ideal_ellipses.txt"
-	idealPathImg = "ideal_map_ellipse.jpg"
-	originalPathImg = "black_score.jpg"
-	idealImg = cv2.imread(idealPathImg, cv2.IMREAD_GRAYSCALE)
-	originalImgRings = cv2.imread(originalPathImg, cv2.IMREAD_GRAYSCALE)
+	quit()
 	#Premapping 
 	ideal_attributes, premapped_attributes = get_map_to_ideal(
 		originalPathTxt, idealPathTxt, idealImg=idealImg, verbose=True)

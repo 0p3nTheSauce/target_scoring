@@ -117,7 +117,7 @@ def ideal_centred_ellipses(title="Ideal rings", show=False, verbose=False, x=700
     cv2.waitKey(0)
     cv2.destroyAllWindows()
   ellipses.sort()
-  return ellipses, img
+  return ellipses, centre, img
 
 def missing(img, x, y):
   ellipses = []
