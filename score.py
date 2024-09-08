@@ -53,23 +53,13 @@ def main():
 	score_elps_m_pnts = ellipses_to_points(score_elps_m)
 	#Bullet points
 	bullet_elps_o_pnts = ellipses_to_points(bullet_elps_o)
-	#Display
-	score_elps_o_img = np.zeros(shape, np.uint8)
-	score_elps_m_img = np.zeros(shape, np.uint8)
-	bullet_elps_o_img = np.zeros(shape, np.uint8)
-	scr_blt_o_img = np.zeros(shape, np.uint8) #bullets plus score rings
-	
-	score_elps_o_img = visualise_points(score_elps_o_img, score_elps_o_pnts)
-	score_elps_m_img = visualise_points(score_elps_m_img, score_elps_m_pnts)
-	bullet_elps_o_img = visualise_points(bullet_elps_o_img, bullet_elps_o_pnts)
-	scr_blt_o_img = visualise_points(score_elps_o_img, bullet_elps_o_pnts)
-	
-	cv2.imshow("Original score rings", score_elps_o_img)
-	cv2.imshow("Mapped score rings", score_elps_m_img)
-	cv2.imshow("Original bullet holes", bullet_elps_o_img)
-	cv2.imshow("Original score rings plus bullet holes", scr_blt_o_img)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	#Bullet points plus score rings
+	blt_scr_o_pnts = np.vstack((bullet_elps_o_pnts, score_elps_o_pnts))
+	#Display	
+	visualise_points(score_elps_o_pnts, title="Original score rings", show=True)
+	visualise_points(score_elps_m_pnts, title="Mapped score rings", show=True)
+	visualise_points(bullet_elps_o_pnts, title="Original bullet holes", show=True)
+	visualise_points(blt_scr_o_pnts, title="Original score rings plus bullet holes", show=True)
 	
 	quit()
 	#Premapping 
