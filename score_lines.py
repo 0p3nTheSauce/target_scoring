@@ -106,8 +106,6 @@ def get_score_lines(imgFile, title='Black Score',
 	contours_score, hierarchy_score = cv2.findContours(cont_score, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 	
 	# cv2.imshow('Thresholding Score', threshscore)
-	cv2.imshow('Thresholding Score', edges)
-	cv2.waitKey(0)
 	#image
 	black_score = np.zeros(gray.shape) 
 	scorecopy = resized.copy()
