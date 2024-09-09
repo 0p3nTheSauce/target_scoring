@@ -91,8 +91,8 @@ def score(bullet_pnts, num_points=100):
 def main():
 	#TODO: Make consistent all the way through
 	print("Getting bullet holes")
-	#imgPath = "TargetPhotos/20141018_155743.jpg"
-	imgPath = "TargetPhotos/20140811_192351.jpg"
+	imgPath = "TargetPhotos/20141018_155743.jpg"
+	#imgPath = "TargetPhotos/20140811_192351.jpg"
 	
 	imgFile = cv2.imread(imgPath, 1)
 	bullet_elps_o = get_bullet_holes(imgFile, title="Bullet holes", 

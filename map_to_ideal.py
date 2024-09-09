@@ -150,7 +150,94 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
 	return radii, diffs, missing_rings
 
 
-				 
+def fill_ideal(most_common_diff):
+	# frst = round((most_common_diff / 72) * 22)
+	# scnd = round((most_common_diff / 72) * 42)
+	# thrd = round((most_common_diff / 72) * 112)
+	# frth = round((most_common_diff / 72) * 184)
+	# fifth = round((most_common_diff / 72) * 256)
+	# sixth = round((most_common_diff / 72) * 328)
+	# seventh = round((most_common_diff / 72) * 400)
+	# eighth = round((most_common_diff / 72) * 472)
+	# ninth = round((most_common_diff / 72) * 508)
+	# tenth = round((most_common_diff / 72) * 544)
+	# eleventh = round((most_common_diff / 72) * 616)
+	# twelvth = round((most_common_diff / 72) * 688)
+	# return [frst, scnd, thrd, frth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelvth]
+	return [688, 616, 544, 508, 472, 400, 328, 256, 184, 112, 42, 22]
+
+def correspond(original_radii, most_common_diff):
+	ideal_mcd = 72
+	map = [round((rad * ideal_mcd) / most_common_diff) for rad in original_radii]
+	ideal_mapped = fill_ideal(most_common_diff)
+	missing = [True]*12
+	thresh = round(ideal_mcd * 0.1)
+	for index, radius in enumerate(map):
+		for i, ideal in enumerate(ideal_mapped):
+			print("original: ", radius)
+			print("ideal: ", ideal)
+			if abs(radius - ideal) < thresh:
+				missing[i] = False
+				ideal_mapped.pop(i)
+				break
+		map.pop(index)
+	return missing
+
+def correspond3(original_radii, most_common_diff):
+	ideal_mcd = 72
+	missing = [True]*12
+	map = [round((rad * ideal_mcd) / most_common_diff) for rad in original_radii]
+	print("original: ", map)
+	ideal_mapped = fill_ideal(most_common_diff)
+	print("ideal: ", ideal_mapped)
+	pos = 0
+	return correspond_rec(map, ideal_mapped, most_common_diff, missing, pos)
+
+def correspond_rec(map, ideal_mapped, most_common_diff, missing, pos):
+	ideal_mcd = 72
+	thresh = round(ideal_mcd * 0.2)
+	rad = map.pop(0)
+	for i, ideal in enumerate(ideal_mapped):
+		if abs(rad - ideal) < thresh:
+			print("Original: ", rad, "corresponds to ideal: ", ideal)
+			missing[i+pos] = False
+			ideal_mapped.pop(i)
+			pos += 1
+			break
+	if len(map) == 0:
+		return missing
+	return correspond_rec(map, ideal_mapped, most_common_diff, missing, pos)
+
+def correspond2(original_radii, most_common_diff):
+		ideal_mcd = 72  # The multiplier to normalize radii
+		thresh = round(ideal_mcd * 0.1)  # Tolerance threshold for considering a match
+		# Normalize the original radii to match the scale of the ideal radii
+		original_radii.reverse()
+		normalized_original = [round((rad * ideal_mcd) / most_common_diff) for rad in original_radii]
+		# Fill the ideal radii values (not provided, assuming it returns a list)
+		ideal_radii = fill_ideal(most_common_diff)
+		# Initialize a list to keep track of missing rings
+		missing = [True] * len(ideal_radii)  # Initially assume all are missing
+		# Track used original radii to avoid duplicate matching
+		used_indices = set()
+		for i, ideal in enumerate(ideal_radii):
+				closest_diff = float('inf')
+				closest_index = -1
+				# Find the closest original radius to the current ideal radius
+				for j, original in enumerate(normalized_original):
+						if j in used_indices:
+								continue  # Skip if this original radius has already been used
+
+						diff = abs(original - ideal)
+						if diff < closest_diff and diff <= thresh:
+								closest_diff = diff
+								closest_index = j
+				# If a close enough match is found, mark the corresponding ideal radius as not missing
+				if closest_index != -1:
+						missing[i] = False
+						used_indices.add(closest_index)  # Mark this original radius as used
+		return missing
+	
 
 def fill_in_missing(ideal_radii, original_radii, original_diffs,
 										displayVars=None):
@@ -187,6 +274,8 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
 	half_most_common_diff = round(most_common_diff / 2)
 	#First handle the first two rings
 	
+	missing_one = correspond3(original_radii, most_common_diff)
+	print(missing_one)
 	#Get last element of original diffs ,
 	first_diff = original_diffs[-1]
 	smallest = min(original_diffs)
