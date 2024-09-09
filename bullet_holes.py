@@ -24,7 +24,7 @@ def get_bullet_holes(imgFile, size=(500, 500), title="Contours",
 		print("Bullet holes")
 	for circles in contours:
 		area = cv2.contourArea(circles)
-		if area < 80 or area > 350:
+		if area < 80 or area > 550:
 			continue
 		if len(circles) < 5:
 			continue
