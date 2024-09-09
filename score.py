@@ -5,7 +5,7 @@ import cv2
 from bullet_holes import get_bullet_holes
 from score_lines import get_score_lines
 from ideal_scoreboard import ideal_centred_ellipses, ideal_centred_circles
-from map_to_ideal import get_map_to_ideal, fill_in_missing2, subtract_rings
+from map_to_ideal import get_map_to_ideal, fill_in_missing2, subtract_rings, subtract_ellipses
 from lines_to_points import ellipses_to_points, circles_to_ellipses, visualise_points, transform
 
 def seperate_points(points, num_points):
@@ -17,7 +17,7 @@ def seperate_points(points, num_points):
 
 def inside_ring(points, centre, radius):
 	cx, cy = centre
-	threshold = 20
+	threshold = 15
 	# Calculate the distance of each point from the center (cx, cy)
 	distances = np.sqrt((points[:, 0] - cx) ** 2 + (points[:, 1] - cy) ** 2)
 	# Check how many points are inside the circle
@@ -118,19 +118,18 @@ def main():
 	print("Filling in missing rings")
 	#Fill in 
 	shape = (700, 700)
-	missing_rings, score_radii_m = fill_in_missing2(radii_m, diffs_rings_m)
+	missing_rings, corr_radii_o = fill_in_missing2(radii_m, diffs_rings_m)
 	print("Missing rings", missing_rings)
-	print("Corresponding score rings", score_radii_m)
+	print("Corresponding score rings", corr_radii_o)
 	if missing_rings is None:
 		print("No mapping possible")
 		return
 	#Finish the mapping 
 	displayVars = (shape, centre_i)
 	mapped_radii = subtract_rings(radii_i, missing_rings, displayVars)
-	
+	score_elps_o = subtract_ellipses(score_elps_o, corr_radii_o)
 	#Convert ellipses to points
 	#Original points
-	score_elps_o = circles_to_ellipses(centre_o, score_radii_m) #we only want the original rings with corresponding ideal rings
 	score_elps_o_pnts = ellipses_to_points(score_elps_o)
 	#Ideal points
 	ideal_elps_pnts = ellipses_to_points(ideal_elps)

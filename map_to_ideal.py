@@ -587,6 +587,15 @@ def subtract_rings(radii, missing ,displayVars=None):
 		cv2.destroyAllWindows()
 	return mapped
 
+def subtract_ellipses(ellipses, corresponding_radii):
+	mapped = []
+	for ellipse in ellipses:
+		((cx, cy), (major_axis, minor_axis), angle) = ellipse
+		rad = round((major_axis + minor_axis) / 2)
+		if rad in corresponding_radii:
+			mapped.append(ellipse)
+	return mapped
+
 def main():
 	# original = cv2.imread("black_score.jpg", cv2.IMREAD_GRAYSCALE)
 	# ideal = cv2.imread("ideal_map_ellipse.jpg", cv2.IMREAD_GRAYSCALE)
