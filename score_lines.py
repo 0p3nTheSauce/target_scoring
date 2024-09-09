@@ -62,11 +62,6 @@ def filter_radius2(ellipses):
 		return [elps1] + filter_radius2(ellipses[1:])
 	return filter_radius2(ellipses[1:])
    
-		
-	
-
-		
-
 def filter_radius(ellipses):
 	ellipses = filter_radius_forward(ellipses)
 	ellipses.reverse()
@@ -81,7 +76,6 @@ def filter_number(ellipses, num=12):
 		return filtered
 	else:
 		return ellipses
-		
 
 def get_score_lines(imgFile, title='Black Score',
 										size=(500, 500), show=False, verbose=False,write=False):
@@ -97,7 +91,6 @@ def get_score_lines(imgFile, title='Black Score',
 	edges=cv2.Canny(gray_blur,100,200)
 	cv2.imshow('Edges', edges)
 	cv2.waitKey(0)
- 
  
 	# ret, threshscore = cv2.threshold(edges, 120, 255, cv2.THRESH_BINARY)
 	# cont_score = threshscore.copy()
@@ -160,7 +153,6 @@ def get_score_lines(imgFile, title='Black Score',
 		cv2.imshow(title, black_score)
 		cv2.waitKey(0)
 		
-		
 		cv2.destroyAllWindows()
 	if write:
 		cv2.imwrite('black_score.jpg', black_score)
@@ -168,78 +160,6 @@ def get_score_lines(imgFile, title='Black Score',
 			with open("experimentation/ellipses/original_ellipses.txt", "a") as f:
 				f.write(str(ellipse) + "\n")
 	return ellipses, centre_o, black_score
-
-# def get_score_lines(imgFile, title='Black Score',
-#                     size=(500, 500), show=False, verbose=False,write=False):
-# 	resized = cv2.resize(imgFile,size)
-# 	gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-# 	gray_blur = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-# 	ret, threshscore = cv2.threshold(gray_blur, 200, 255, cv2.THRESH_BINARY)
-# 	cont_score = threshscore.copy()
-# 	contours_score, hierarchy_score = cv2.findContours(cont_score, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	
-#   #image
-# 	black_score = np.zeros(gray.shape) 
-# 	scorecopy = resized.copy()
-# 	colour = (255,0,0)
-# 	thickness = 1
-#   #Attributes
-# 	thresh = 2
-# 	major_prev = 0
-# 	ellipses = []
-# 	centre_o = ()
-# 	totcx = 0
-# 	totcy = 0
-# 	score_rings = 0
-# 	if verbose:
-# 		print("Original rings")
-# 	for score_circles in contours_score:
-# 		area = cv2.contourArea(score_circles)
-# 		if area < 100:
-# 			continue
-# 		if len(score_circles) < 5:
-# 			continue
-# 		ellipse = cv2.fitEllipse(score_circles)
-# 		((cx, cy), (major_axis, minor_axis), angle) = ellipse
-# 		if abs(major_axis - major_prev) < thresh:
-# 			continue
-# 		totcx += cx
-# 		totcy += cy
-# 		ellipses.append(ellipse)
-# 		major_prev = major_axis
-# 		#image
-# 		cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
-# 		cv2.ellipse(scorecopy, ellipse, colour, thickness, cv2.LINE_8)
-			
-# 	score_rings = len(ellipses)
-# 	centre_o = (totcx//score_rings, totcy//score_rings)
-# 	ellipses = sort_ellipses(ellipses)
-# 	if verbose:
-# 		for ellipse in ellipses:
-# 			print(ellipse)
-# 		print("Centre: ", centre_o)
-# 		print("Score Rings: ", score_rings)
-# 	if show:
-# 		cv2.imshow('Resized', resized)
-# 		cv2.waitKey(0)
-# 		cv2.imshow('Gray', gray)
-# 		cv2.waitKey(0)
-# 		cv2.imshow('Gray Blur', gray_blur)
-# 		cv2.waitKey(0)
-# 		cv2.imshow('Thresholding Score', threshscore)
-# 		cv2.waitKey(0)
-# 		cv2.imshow(title, black_score)
-# 		cv2.waitKey(0)
-# 		cv2.imshow('Contours Score', scorecopy)
-# 		cv2.waitKey(0)
-		
-# 		cv2.destroyAllWindows()
-# 	if write:
-# 		cv2.imwrite('black_score.jpg', black_score)
-# 		for ellipse in ellipses:
-# 			with open("original_ellipses.txt", "a") as f:
-# 				f.write(str(ellipse) + "\n")
-# 	return ellipses, centre_o, black_score
 
 def main():
 	# if len(sys.argv) == 2:

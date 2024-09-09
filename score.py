@@ -27,21 +27,6 @@ def inside_ring(points, centre, radius):
 	#Check if at least threshold points are inside the circle
 	return points_inside_circle >= threshold
 
-# def inside_ring(points, centre, radius):
-# 	cx, cy = centre
-# 	threshold = 20
-# 	inside = []
-# 	points_inside_circle = 0
-# 	# Calculate the distance of each point from the center (cx, cy)
-# 	for point in points:
-# 		x, y = point
-# 		distance = math.sqrt((x - cx) ** 2 + (y - cy) ** 2)
-# 		if distance <= radius:
-# 			points_inside_circle += 1
-# 			inside.append(point)
-# 	print("Points inside circle:", points_inside_circle)
-# 	return inside, points_inside_circle >= threshold
-
 def score_single(bullet_pnts, ideal_radii, centre_i):
 	score = 11
 	for radii in ideal_radii:
@@ -49,15 +34,6 @@ def score_single(bullet_pnts, ideal_radii, centre_i):
 			return score
 		score -= 1
 	return 0
-
-# def score_single(bullet_pnts, ideal_radii, centre_i):
-# 	score = 11
-# 	for radii in ideal_radii:
-# 		inside, points_inside_circle = inside_ring(bullet_pnts, centre_i, radii)
-# 		if points_inside_circle:
-# 			return score, inside
-# 		score -= 1
-# 	return 0
 
 def score(bullet_pnts, num_points=200):
 	scores = []
@@ -71,23 +47,6 @@ def score(bullet_pnts, num_points=200):
 		total += score
 	print("Scores:", scores)
 	print("Total:", total)
-	
-# def score(bullet_pnts, num_points=100):
-# 	scores = []
-# 	points_inside = np.empty((0, 2))
-# 	total = 0
-# 	split_points = seperate_points(bullet_pnts, num_points)
-# 	print(len(split_points))
-# 	ideal_radii, centre_i, _ = ideal_centred_circles(include_inner=False)
-# 	for blt_pnts in split_points:
-# 		score, inside = score_single(blt_pnts, ideal_radii, centre_i)
-# 		scores.append(score)
-# 		points_inside = np.vstack((points_inside, np.array((inside))))
-# 		total += score
-# 	print("Scores:", scores)
-# 	print("Total:", total)
-# 	return points_inside
- 
 
 def main():
 	#TODO: Make consistent all the way through
@@ -98,7 +57,6 @@ def main():
 	print("Getting bullet holes")
 	#imgPath = "TargetPhotos/20141018_155743.jpg"
 	#imgPath = "TargetPhotos/20140811_192351.jpg"
-
 	
 	imgFile = cv2.imread(imgPath, 1)
 	bullet_elps_o = get_bullet_holes(imgFile, title="Bullet holes", 
