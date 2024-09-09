@@ -6,6 +6,23 @@ import sys
 from ideal_scoreboard import ideal_centred_ellipses
 from score_lines import get_score_lines
 
+def normalise_radii(radii):
+  #There should not be radii with a difference less than 10
+  thresh = 20
+  made_change = False
+  normalised = []
+  for i in range(1, len(radii), 2):
+    diff = abs(radii[i-1] - radii[i])
+    if diff < thresh:
+      made_change = True
+      average = round((radii[i-1] + radii[i]) / 2)
+      normalised.append(average)
+    else:
+      normalised.append(radii[i-1])
+      normalised.append(radii[i])
+  if made_change:
+    return normalise_radii(normalised)
+  return normalised
 
 def normalise_diffs(diffs_rings):
   #There should be max 4 different differences between the radii
@@ -112,7 +129,9 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   radii, diffs = reorder(radii)
   return radii, diffs, missing_rings
 
-  
+
+       
+
 def fill_in_missing(ideal_radii, original_radii, original_diffs,
                     displayVars=None):
   #TODO: Try with multiple missing rings
@@ -130,6 +149,9 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
     #in all cases
     print("Not enough rings to reliably fill in")
     return None, None
+  #normalise the radii
+  
+  
   mapped_radii = []
   mapped_radii.extend(original_radii)
   mapped_diffs = []
@@ -418,6 +440,7 @@ def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i,
     radii_o.append(radius)
   score_rings_o = len(radii_o)
   #Calculate the differences between the radii
+  radii_o = normalise_radii(radii_o)
   diffs_rings_o = calculate_diffs(radii_o, normalise=False)
   if verbose:
     print("Original Centre: ", centre_o)
@@ -427,6 +450,7 @@ def get_map_to_ideal(original_elps, centre_o, ideal_elps, centre_i,
     print()
   
   ##########################################Mapped##########################################
+  
   #Attributes
   mapped_ellipses = []
   diffs_rings_m = [] #capture the differences between the radii
@@ -505,7 +529,8 @@ def main():
   #   originalPath = input("Enter the original image file: ")
   #   idealPathImg = input("Enter the ideal image file: ")
   #   idealPathTxt = input("Enter the ideal text file: ")
-  originalPathImg = "TargetPhotos/20141018_155743.jpg"
+  #originalPathImg = "TargetPhotos/20141018_155743.jpg"
+  originalPathImg = "TargetPhotos/20140811_192351.jpg"
   originalImg = cv2.imread(originalPathImg, cv2.IMREAD_UNCHANGED)
   
   score_elps_o, centre_o, scoreImg = get_score_lines(originalImg)

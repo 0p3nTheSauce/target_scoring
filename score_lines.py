@@ -26,6 +26,18 @@ def filter_centre(ellipses, centreImg=(250,250)):
 			filtered.append(ellipse)
 	return filtered
 
+
+
+def filter_number(ellipses, num=12):
+  filtered = []
+  if len(ellipses) > num:
+    for i in range(0, len(ellipses), 2):
+      filtered.append(ellipses[i])
+    return filtered
+  else:
+    return ellipses
+    
+
 def get_score_lines(imgFile, title='Black Score',
 										size=(500, 500), show=False, verbose=False,write=False):
 	resized = cv2.resize(imgFile,size)
@@ -76,12 +88,15 @@ def get_score_lines(imgFile, title='Black Score',
 		((cx, cy), (major_axis, minor_axis), angle) = ellipse
 		if abs(major_axis - major_prev) < thresh:
 			continue
+		if abs(minor_axis - major_axis) < thresh:
+			continue
 		totcx += cx
 		totcy += cy
 		ellipses.append(ellipse)
 		major_prev = major_axis
 		#image
 	ellipses = filter_centre(ellipses)
+	ellipses = filter_number(ellipses)
 	for ellipse in ellipses:
 		cv2.ellipse(black_score, ellipse, colour, thickness, cv2.LINE_8)
 		cv2.ellipse(scorecopy, ellipse, colour, thickness, cv2.LINE_8)
@@ -187,7 +202,8 @@ def main():
 	# else:
 	#   imgPath = input("Enter the image file: ")
 	#imgFile = cv2.imread("TargetPhotos/20141018_155743.jpg", 1)
-	imgFile = cv2.imread("TargetPhotos/20141022_194340.jpg", 1)
+	# imgFile = cv2.imread("TargetPhotos/20141022_194340.jpg", 1)
+	imgFile = cv2.imread("TargetPhotos/20140811_192351.jpg", 1)
 	score_lines, centre_o, black_score = get_score_lines(imgFile,
 																											show=True, verbose=True,
 																											write=False)
