@@ -29,7 +29,6 @@ def transform(source_points, destination_points, bullet_holes,
 		print(H)
 		print()
 	
-	
 	#Return to original shape
 	transformed_points = transformed_points.reshape(-1, 2)
 
