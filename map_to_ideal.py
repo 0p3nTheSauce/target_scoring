@@ -54,8 +54,8 @@ def calculate_diffs(radii, normalise=True):
 	return diffs
 
 def filter_radius(radii):
-	thresh = 17
-	thresh_rad = 22
+	thresh = 10
+	thresh_rad = 10
 	if len(radii) == 0:
 		return []
 	elif len(radii) == 1:
@@ -73,13 +73,12 @@ def filter_radius(radii):
 		return [radius1] + filter_radius(radii[1:])
 	return filter_radius(radii[1:])
 
-def reorder(radii, normalise=True):
+def reorder(radii):
 	#prepare for next fill in 
 	radii.sort()
 	radii.reverse()
-	radii = filter_radius(radii)
 	#calculate diffs
-	diffs = calculate_diffs(radii, normalise)
+	diffs = calculate_diffs(radii)
 	return radii, diffs
 
 def fill_from(missing_rings, radii, most_common_diff, from_ring):
@@ -188,47 +187,9 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
 	half_most_common_diff = round(most_common_diff / 2)
 	#First handle the first two rings
 	
-	#The smallest radii should be in the region of 22
-	thresh = most_common_diff * 0.25
-	ideal_frad = (most_common_diff / 72) * 22
 	#Get last element of original diffs ,
 	first_diff = original_diffs[-1]
 	smallest = min(original_diffs)
-	
-	#get the first radius. 
-	first_rad = original_radii[-1]
-	if abs(first_diff - ideal_frad) > thresh:
-		#We are missing the first ring
-		missing_rings[-1] = True
-		#generate the first ring
-		first_ring = round((most_common_diff / 72) * 22)
-		mapped_radii.append(first_ring)
-		#prepare for next fill in
-		mapped_radii, mapped_diffs = reorder(mapped_radii, normalise=False)
-	#get the second radius. It should be in the region of 42
-	second_rad = original_radii[-2]
-	ideal_srad = (most_common_diff / 72) * 42
-	if abs(second_rad - ideal_srad) > thresh:
-		#We are missing the second ring
-		missing_rings[-2] = True
-		#generate the second ring
-		second_ring = round((most_common_diff / 72) * 42)
-		mapped_radii.append(second_ring)
-		#prepare for next fill in
-		mapped_radii, mapped_diffs = reorder(mapped_radii, normalise=False)
-	
-	#get the third radius. It should be in the region of 112
-	third_rad = original_radii[-3]
-	ideal_trad = (most_common_diff / 72) * 112
-	if abs(third_rad - ideal_trad) > thresh:
-		#We are missing the third ring
-		missing_rings[-3] = True
-		#generate the third ring
-		third_ring = round((most_common_diff / 72) * 112)
-		mapped_radii.append(third_ring)
-		#prepare for next fill in
-		mapped_radii, mapped_diffs = reorder(mapped_radii, normalise=False)
-	
 	#should be smallest
 	if first_diff != smallest: 
 		#the smallest and second smallest ring should be smaller than the most common difference
@@ -591,7 +552,7 @@ def main():
 	#   idealPathTxt = input("Enter the ideal text file: ")
 	originalPathImg = "TargetPhotos/20141018_155743.jpg"
 	#originalPathImg = "TargetPhotos/20140811_192351.jpg"
-	# originalImg = cv2.imread(originalPathImg, 1)
+	#originalImg = cv2.imread(originalPathImg, 1)
 	originalImg = cv2.imread(originalPathImg, cv2.IMREAD_UNCHANGED)
 	
 	score_elps_o, centre_o, scoreImg = get_score_lines(originalImg
