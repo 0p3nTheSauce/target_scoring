@@ -130,7 +130,7 @@ def fill_from(missing_rings, radii, most_common_diff, from_ring):
   return radii, diffs, missing_rings
 
 
-       
+         
 
 def fill_in_missing(ideal_radii, original_radii, original_diffs,
                     displayVars=None):
@@ -208,7 +208,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   
   #get the second last element of original diffs. should be somewhere in the range of 
   #the most common difference
-  threshold = most_common_diff * 0.1
+  threshold = most_common_diff * 0.25
   second_last_diff = mapped_diffs[-2]
   if abs(second_last_diff - most_common_diff) > threshold:
     #We are missing the 3rd ring
@@ -223,7 +223,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   
   #get the third last element of original diffs.
   third_last_diff = mapped_diffs[-3]
-  if third_last_diff != most_common_diff:
+  if abs(third_last_diff - most_common_diff) > threshold:
     #We are missing the 4th ring
     missing_rings[-4] = True
     #generate the 4th ring
@@ -234,7 +234,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   
   #get the fourth last element of original diffs.
   fourth_last_diff = mapped_diffs[-4]
-  if fourth_last_diff != most_common_diff:
+  if abs(fourth_last_diff - most_common_diff) > threshold:
     #We are missing the 5th ring
     missing_rings[-5] = True
     #generate the 5th ring
@@ -249,7 +249,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   else:
     #get the fifth last element of original diffs.
     fifth_last_diff = mapped_diffs[-5]
-    if fifth_last_diff != most_common_diff:
+    if abs(fifth_last_diff - most_common_diff) > threshold:
       #We are missing the 6th ring
       missing_rings[-6] = True
       #generate the 6th ring
@@ -264,7 +264,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   else:
     #get the sixth last element of original diffs.
     sixth_last_diff = mapped_diffs[-6]
-    if sixth_last_diff != most_common_diff:
+    if abs(fifth_last_diff - most_common_diff) > threshold:
       #We are missing the 7th ring
       missing_rings[-7] = True
       #generate the 7th ring
@@ -279,7 +279,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
   else:
     #get the seventh last element of original diffs.
     seventh_last_diff = mapped_diffs[-7]
-    if seventh_last_diff != most_common_diff:
+    if abs(seventh_last_diff - most_common_diff) > threshold:
       #We are missing the 8th ring
       missing_rings[-8] = True
       #generate the 8th ring
@@ -336,7 +336,7 @@ def fill_in_missing(ideal_radii, original_radii, original_diffs,
     mapped_radii, mapped_diffs, missing_rings = fill_from(missing_rings, mapped_radii, most_common_diff, 11)
   else: 
     tenth_last_diff = mapped_diffs[-10]
-    if tenth_last_diff != most_common_diff:
+    if abs(tenth_last_diff - most_common_diff) > threshold:
       #We are missing the 11th ring
       missing_rings[-11] = True
       #generate the 11th ring
