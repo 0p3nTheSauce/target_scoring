@@ -161,36 +161,39 @@ def correspond3(original_radii, most_common_diff):
 	ideal_mapped = fill_ideal()
 	print("ideal: ", ideal_mapped)
 	pos = 0
-	missing = correspond_rec(map, ideal_mapped, most_common_diff, missing, pos)
-	return missing
+	corresponding = []
+	missing, corresponding = correspond_rec(map, ideal_mapped, most_common_diff, missing, pos, corresponding)
+	unmap = [round((rad * most_common_diff) / ideal_mcd) for rad in corresponding]
+	return missing, unmap
 
-def correspond_rec(map, ideal_mapped, most_common_diff, missing, pos):
+def correspond_rec(map, ideal_mapped, most_common_diff, missing, pos, corresponding):
 	ideal_mcd = 72
-	thresh = round(ideal_mcd * 0.2)
+	thresh = round(ideal_mcd * 0.25)
 	rad = map.pop(0)
 	for i, ideal in enumerate(ideal_mapped):
-		if abs(rad - ideal) < thresh:
+		if abs(rad - ideal) <= thresh:
 			print("Original: ", rad, "corresponds to ideal: ", ideal)
+			corresponding.append(rad)
 			missing[i+pos] = False
 			ideal_mapped.pop(i)
 			pos += 1
 			break
 	if len(map) == 0:
-		return missing
-	return correspond_rec(map, ideal_mapped, most_common_diff, missing, pos)
+		return missing, corresponding
+	return correspond_rec(map, ideal_mapped, most_common_diff, missing, pos, corresponding)
 
-def fill_in_missing2(ideal_radii, original_radii, original_diffs):
-	if len(ideal_radii) == len(original_radii):
-		return original_radii, [False]*12
-	elif len(original_radii) < 4: 
+def fill_in_missing2(original_radii, original_diffs):
+
+	if len(original_radii) < 4: 
 		#This function could work with 3 if the first 3 rings are captured,
 		#but better to be on the conservative side. Even 4 rings may not work
 		#in all cases
 		print("Not enough rings to reliably fill in")
 		return None, None
 	most_common_diff = Counter(original_diffs).most_common(1)[0][0]
-	missing = correspond3(original_radii, most_common_diff)
-	return missing
+	original_copy = original_radii.copy()
+	missing, unmap = correspond3(original_copy, most_common_diff)
+	return missing, unmap
 	
 
 def fill_in_missing(ideal_radii, original_radii, original_diffs,
