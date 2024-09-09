@@ -6,7 +6,7 @@ from bullet_holes import get_bullet_holes
 from score_lines import get_score_lines
 from ideal_scoreboard import ideal_centred_ellipses, ideal_centred_circles
 from map_to_ideal import get_map_to_ideal, fill_in_missing2, subtract_rings, subtract_ellipses
-from lines_to_points import ellipses_to_points, circles_to_ellipses, visualise_points, transform
+from lines_to_points import ellipses_to_points, circles_to_ellipses, visualise_points, transform, ellipses_to_points_bullets
 
 def seperate_points(points, num_points):
 	n = points.shape[0] // num_points
@@ -58,7 +58,7 @@ def score_single(bullet_pnts, ideal_radii, centre_i):
 # 		score -= 1
 # 	return 0
 
-def score(bullet_pnts, num_points=100):
+def score(bullet_pnts, num_points=200):
 	scores = []
 	total = 0
 	split_points = seperate_points(bullet_pnts, num_points)
@@ -137,7 +137,7 @@ def main():
 	score_elps_m = circles_to_ellipses(centre_m, mapped_radii)
 	score_elps_m_pnts = ellipses_to_points(score_elps_m)
 	#Bullet points
-	bullet_elps_o_pnts = ellipses_to_points(bullet_elps_o)
+	bullet_elps_o_pnts = ellipses_to_points_bullets(bullet_elps_o)
 	#Bullet points plus score rings
 	blt_scr_o_pnts = np.vstack((bullet_elps_o_pnts, score_elps_o_pnts))
 	#Display	

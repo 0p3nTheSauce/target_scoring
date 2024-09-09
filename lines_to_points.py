@@ -112,33 +112,45 @@ def point_in_ellipse(point, ellipse):
 		return inside
 
 def get_ellipse_centre_points(ellipse, num_points):
-  #the low effort way
 	((cx, cy), (major, minor), theta) = ellipse
 	major /= 2  # Convert to semi-major axis length
 	minor /= 2  # Convert to semi-minor axis length
-	x = np.linspace(cx-major, cx+major, num_points)
-	y = np.linspace(cy-major, cy+major, num_points)
-	pnts = np.vstack((x, y)).T
-	inside = []
-	for pnt in pnts:
-		if point_in_ellipse(pnt, ellipse):
-			inside.append(pnt)
-	return np.array(inside)
+	theta = np.radians(theta)
+	
+	# Generate random points inside a unit circle
+	r = np.sqrt(np.random.uniform(0, 1, num_points))  # Radius (sqrt to ensure uniform distribution)
+	t = np.random.uniform(0, 2 * np.pi, num_points)   # Angle
+
+	# Convert to ellipse coordinates
+	x = major * r * np.cos(t)
+	y = minor * r * np.sin(t)
+
+	# Apply rotation to align with the ellipse's orientation
+	cos_theta = np.cos(theta)
+	sin_theta = np.sin(theta)
+
+	# Rotate the points to match the ellipse orientation
+	x_rot = cx + x * cos_theta - y * sin_theta
+	y_rot = cy + x * sin_theta + y * cos_theta
+
+	return np.vstack((x_rot, y_rot)).T
 	 
 
-def ellipses_to_points(ellipse_array, numpoints=100):
-  ellipse_points = np.empty((0, 2), dtype=np.float64)
-  for ellipse in ellipse_array:
-    points = get_ellipse_points(ellipse, numpoints)
-    ellipse_points = np.vstack((ellipse_points, points))
-  return ellipse_points
+def ellipses_to_points_bullets(ellipse_array, numpoints=100):
+	ellipse_points = np.empty((0, 2), dtype=np.float64)
+	for ellipse in ellipse_array:
+		points_edge = get_ellipse_points(ellipse, numpoints)
+		points_centre = get_ellipse_centre_points(ellipse, numpoints)
+		points = np.vstack((points_edge, points_centre))
+		ellipse_points = np.vstack((ellipse_points, points))
+	return ellipse_points
 
-# def ellipses_to_points(ellipse_array, numpoints=100):
-# 	ellipse_points = np.empty((0, 2), dtype=np.float64)
-# 	for ellipse in ellipse_array:
-# 		points = get_ellipse_centre_points(ellipse, numpoints)
-# 		ellipse_points = np.vstack((ellipse_points, points))
-# 	return ellipse_points
+def ellipses_to_points(ellipse_array, numpoints=100):
+	ellipse_points = np.empty((0, 2), dtype=np.float64)
+	for ellipse in ellipse_array:
+		points = get_ellipse_points(ellipse, numpoints)
+		ellipse_points = np.vstack((ellipse_points, points))
+	return ellipse_points
 
 def circles_to_points(centre, radii, numpoints=100):
 		# Start with an empty NumPy array
@@ -150,30 +162,6 @@ def circles_to_points(centre, radii, numpoints=100):
 				circle_points = np.vstack((circle_points, points))
 
 		return circle_points
-
-def get_random_points_in_ellipse(ellipse, num_points):
-    ((cx, cy), (major, minor), theta) = ellipse
-    major /= 2  # Convert to semi-major axis length
-    minor /= 2  # Convert to semi-minor axis length
-    theta = np.radians(theta)
-    
-    # Generate random points inside a unit circle
-    r = np.sqrt(np.random.uniform(0, 1, num_points))  # Radius (sqrt to ensure uniform distribution)
-    t = np.random.uniform(0, 2 * np.pi, num_points)   # Angle
-
-    # Convert to ellipse coordinates
-    x = major * r * np.cos(t)
-    y = minor * r * np.sin(t)
-
-    # Apply rotation to align with the ellipse's orientation
-    cos_theta = np.cos(theta)
-    sin_theta = np.sin(theta)
-
-    # Rotate the points to match the ellipse orientation
-    x_rot = cx + x * cos_theta - y * sin_theta
-    y_rot = cy + x * sin_theta + y * cos_theta
-
-    return np.vstack((x_rot, y_rot)).T
 
 def circles_to_ellipses(centre, radii):
 	ellipses = []
@@ -207,9 +195,9 @@ def test():
 	# a_bullet_points1 = get_ellipse_points(a_bullet, 100)
 	# a_bullet_points2 = get_ellipse_points(a_bullet2, 100)
 	# a_bullet_points3 = get_ellipse_points(a_bullet3, 100)
-	a_bullet_points1 = get_random_points_in_ellipse(a_bullet, 100)
-	a_bullet_points2 = get_random_points_in_ellipse(a_bullet2, 100)
-	a_bullet_points3 = get_random_points_in_ellipse(a_bullet3, 100)
+	a_bullet_points1 = get_ellipse_centre_points(a_bullet, 100)
+	a_bullet_points2 = get_ellipse_centre_points(a_bullet2, 100)
+	a_bullet_points3 = get_ellipse_centre_points(a_bullet3, 100)
 	a_bullet_points = np.vstack((a_bullet_points1, a_bullet_points2, a_bullet_points3))
 	visualise_points(a_bullet_points, title="Bullet points", show=True)
 def main():
